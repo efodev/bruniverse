@@ -3,6 +3,7 @@
 import { signinFields } from "@/app/ui/auth/data";
 import { AuthForm } from "@/app/ui/auth/forms";
 
+
 /**
  *  
  * @returns 
@@ -12,15 +13,15 @@ export default function LoginPage() {
 		<>
 			<AuthForm
 				title="Welcome Back to Bruniverse, Where you connect and find answers."
-				subtitle="Sign in to your account"
+				subtitle="Login to Bruniverse"
 				fields={signinFields}
-				formClassName="bg-orange-50 rounded-lg bg-white p-6 shadow-lg"
-				className="fixed inset-0 overflow-hidden"
-				primaryAction={{
-					label: "Sign In",
+				className="text-[#770000]"
+				formClassName=""
+				buttonAction={{
+					label: "Login",
 					onClick: async (data) => {
 						console.log("Signin data:", data);
-						// Handle signin logic
+						// Handle signin logic and  set disabling state
 					},
 				}}
 				links={[

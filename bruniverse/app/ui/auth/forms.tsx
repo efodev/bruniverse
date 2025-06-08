@@ -3,38 +3,37 @@
 
 import React, { useState } from 'react';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import { AuthFormProps, AuthAction, AuthLink, FormField } from '../definitions';
-import { signupFields, signinFields } from './data';
+import { AuthFormProps, AuthAction, FormField } from '../definitions';
 import { montserrat } from "@/app/ui/fonts";
 import Link from 'next/link';
+import styles from "@/app/(auth)/auth.module.css";
 
 // Button variants
 // Todo: Probably move button to the 
 const buttonVariants = {
-  primary: "w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2",
-  secondary: "w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2",
-  outline: "w-full border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+	primary:
+		"bg-[#770000] text-white font-semibold rounded-lg hover:bg-[#550000] focus:outline-none focus:ring-2 focus:ring-[#770000] focus:ring-offset-2 transition-colors duration-200",
+	secondary:
+		"bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 transition-colors duration-200",
 };
 
 export const AuthForm: React.FC<AuthFormProps> = ({
   title,
   subtitle,
   fields,
-  primaryAction,
-  secondaryActions = [],
+  buttonAction,
   links = [],
   footer,
   className = "",
   formClassName = "",
   showPasswordToggle = true,
-  socialProviders = []
 }) => {
 	const [formData, setFormData] = useState<Record<string, string>>({});
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>(
 		{}
 	);
-	const [isLoading, setIsLoading] = useState(false);
+
 	/**
 	 * Updates form fields when user types in the values.
 	 * Clear error messages in fills in a form field.
@@ -55,6 +54,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 	const togglePasswordVisibility = (fieldId: string) => {
 		setShowPasswords((prev) => ({ ...prev, [fieldId]: !prev[fieldId] }));
 	};
+
 	/**
 	 * Check whether user provides valid form data.
 	 * @param field interface of form field being validated.
@@ -116,241 +116,152 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 	/**
 	 * Handles submission of form on button click.
 	 * It first validate the form and sets the error message in case of any error.
-   * If no error sets the state of `isLoading`.
-	 *
+	 * If the form is valid, it calls the `onClick` method of the provided `AuthAction`
+	 * interface with the form data.
 	 * @param action an instance of AuthAction interface
 	 * @returns
 	 */
 	const handleSubmit = async (action: AuthAction) => {
 		if (!validateForm()) return;
 
-		setIsLoading(true);
 		try {
 			await action.onClick(formData);
 		} catch (error) {
 			console.error("Auth action failed:", error);
-		} finally {
-			setIsLoading(false);
 		}
 	};
 
-	// Third party loading spinner
-	const LoadingSpinner = () => (
-		<svg
-			className="animate-spin h-5 w-5"
-			xmlns="http://www.w3.org/2000/svg"
-			fill="none"
-			viewBox="0 0 24 24"
-		>
-			<circle
-				className="opacity-25"
-				cx="12"
-				cy="12"
-				r="10"
-				stroke="currentColor"
-				strokeWidth="4"
-			></circle>
-			<path
-				className="opacity-75"
-				fill="currentColor"
-				d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-			></path>
-		</svg>
-	);
-
 	return (
 		<div
-			className={`fixed inset-0 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 ${className}`}
+			className={`w-full space-y-6 flex flex-col justify-center items-center ${className}`}
 		>
-			<div className="max-w-md w-full space-y-8">
-				{/* Header */}
-				<div className="text-center">
-					<h2
-						className={`text-3xl font-bold text-[#770000] mb-2 ${montserrat.className}`}
-					>
-						{title}
-					</h2>
-					{subtitle && (
-						<p className="text-sm text-gray-600">{subtitle}</p>
-					)}
+			{/* Header Section */}
+			<div className="text-center space-y-2">
+				<h1 className="text-lg font-bold tracking-tight">{title}</h1>
+				{subtitle && (
+					<p className="text-md font-bold -mb-3 mt-6">{subtitle}</p>
+				)}
+			</div>
+
+			{/* Form Section */}
+			<div
+				className={`w-4/5 bg-white rounded-xl shadow-sm border border-gray-200 p-8 space-y-6 ${styles.bgcolor} ${formClassName}`}
+			>
+				{/* Form Fields */}
+				<div className="space-y-5">
+					{fields.map((field) => (
+						<div
+							key={field.id}
+							className="space-y-1"
+						>
+							<label
+								htmlFor={field.id}
+								className={`block text-sm font-medium`}
+							>
+								{field.label}
+								{field.required && (
+									<span className="text-red-500 ml-1">*</span>
+								)}
+							</label>
+
+							<div className="relative">
+								{field.icon && (
+									<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+										<field.icon className="h-5 w-5 text-gray-400" />
+									</div>
+								)}
+
+								<input
+									id={field.id}
+									name={field.id}
+									type={
+										field.type === "password" &&
+										showPasswords[field.id]
+											? "text"
+											: field.type
+									}
+									placeholder={field.placeholder}
+									value={formData[field.id] || ""}
+									onChange={(e) =>
+										handleInputChange(
+											field.id,
+											e.target.value
+										)
+									}
+									className={` ${styles.fieldbgcolor}
+                    block w-full px-4 py-3 border rounded-lg text-gray-900 
+                    placeholder-gray-500 focus:outline-none focus:ring-2 
+                    focus:ring-[#770000] focus:border-transparent transition-all duration-200
+                    ${field.icon ? "pl-10" : ""}
+                    ${
+						field.type === "password" && showPasswordToggle
+							? "pr-10"
+							: ""
+					}
+                    ${
+						errors[field.id]
+							? "border-red-300 focus:ring-red-500"
+							: "border-gray-300 hover:border-gray-400"
+					}
+                  `}
+								/>
+
+								{field.type === "password" &&
+									showPasswordToggle && (
+										<button
+											type="button"
+											onClick={() =>
+												togglePasswordVisibility(
+													field.id
+												)
+											}
+											className="absolute inset-y-0 right-0 pr-3 flex items-center"
+										>
+											{showPasswords[field.id] ? (
+												<EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
+											) : (
+												<EyeIcon className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
+											)}
+										</button>
+									)}
+							</div>
+
+							{errors[field.id] && (
+								<p className="text-sm text-red-600 mt-1">
+									{errors[field.id]}
+								</p>
+							)}
+						</div>
+					))}
 				</div>
 
-				{/* Social Providers */}
-				{socialProviders.length > 0 && (
-					<div className="space-y-3">
-						{socialProviders.map((provider, index) => (
-							<button
+				{/* Links Section */}
+				{links.length > 0 && (
+					<div className="flex justify-between text-sm">
+						{links.map((link, index) => (
+							<Link
 								key={index}
-								onClick={provider.onClick}
-								className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+								href={link.href}
+								onClick={link.onClick}
+								className="text-[#770000] hover:text-[#550000] font-medium transition-colors duration-200"
 							>
-								<provider.icon className="h-5 w-5" />
-								<span className="text-sm font-medium text-gray-700">
-									Continue with {provider.name}
-								</span>
-							</button>
+								{link.label}
+							</Link>
 						))}
-
-						<div className="relative">
-							<div className="absolute inset-0 flex items-center">
-								<div className="w-full border-t border-gray-300" />
-							</div>
-							<div className="relative flex justify-center text-sm">
-								<span className="px-2 bg-gray-50 text-gray-500">
-									Or continue with email
-								</span>
-							</div>
-						</div>
 					</div>
 				)}
 
-				{/* Form Fields */}
-				<div className={`space-y-6 ${formClassName}`}>
-					<div className="space-y-4">
-						{fields.map((field) => (
-							<div key={field.id}>
-								<label
-									htmlFor={field.id}
-									className="block text-sm font-medium text-gray-700 mb-1"
-								>
-									{field.label}
-									{field.required && (
-										<span className="text-red-500 ml-1">
-											*
-										</span>
-									)}
-								</label>
-								<div className="relative">
-									{field.icon && (
-										<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none ">
-											<field.icon className="h-5 w-5 text-gray-400" />
-										</div>
-									)}
-									<input
-										id={field.id}
-										name={field.id}
-										type={
-											field.type === "password" &&
-											showPasswords[field.id]
-												? "text"
-												: field.type
-										}
-										placeholder={field.placeholder}
-										value={formData[field.id] || ""}
-										onChange={(e) =>
-											handleInputChange(
-												field.id,
-												e.target.value
-											)
-										}
-										className={`
-                      block w-full px-3 py-3 border border-gray-300 rounded-lg
-                      placeholder-gray-400 text-gray-900 focus:outline-none 
-                      focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                      transition-colors duration-200
-                      ${field.icon ? "pl-10" : ""}
-                      ${
-							field.type === "password" && showPasswordToggle
-								? "pr-10"
-								: ""
-						}
-                      ${
-							errors[field.id]
-								? "border-red-500 focus:ring-red-500"
-								: ""
-						}
-                    `}
-									/>
-									{field.type === "password" &&
-										showPasswordToggle && (
-											<button
-												type="button"
-												onClick={() =>
-													togglePasswordVisibility(
-														field.id
-													)
-												}
-												className="absolute inset-y-0 right-0 pr-3 flex items-center"
-											>
-												{showPasswords[field.id] ? (
-													<EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-												) : (
-													<EyeIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-												)}
-											</button>
-										)}
-								</div>
-								{errors[field.id] && (
-									<p className="mt-1 text-sm text-red-600">
-										{errors[field.id]}
-									</p>
-								)}
-							</div>
-						))}
-					</div>
+				{/* Submit Button */}
+				<button
+					type="submit"
+					onClick={() => handleSubmit(buttonAction)}
+					className={`w-2/5 py-3 px-12 flex justify-self-center 
+						${buttonVariants[buttonAction.variant || "primary"]}`}
+				>
+					{buttonAction.label}
+				</button>
 
-					{/* Links (like "Forgot Password?") */}
-					{links.length > 0 && (
-						<div className="flex flex-wrap gap-4 text-sm">
-							{links.map((link, index) => (
-								<Link
-									key={index}
-									href={link.href}
-									onClick={link.onClick}
-									className="text-blue-600 hover:text-blue-500 transition-colors duration-200"
-								>
-									{link.label}
-								</Link>
-							))}
-						</div>
-					)}
-
-					{/* Action Buttons */}
-					<div className="space-y-3">
-						<button
-							type="submit"
-							onClick={() => handleSubmit(primaryAction)}
-							disabled={isLoading || primaryAction.loading}
-							className={
-								buttonVariants[
-									primaryAction.variant || "primary"
-								]
-							}
-						>
-							{isLoading || primaryAction.loading ? (
-								<>
-									<LoadingSpinner />
-									Loading...
-								</>
-							) : (
-								primaryAction.label
-							)}
-						</button>
-
-						{secondaryActions.map((action, index) => (
-							<button
-								key={index}
-								type="button"
-								onClick={() => handleSubmit(action)}
-								disabled={isLoading || action.loading}
-								className={
-									buttonVariants[action.variant || "outline"]
-								}
-							>
-								{action.loading ? (
-									<>
-										<LoadingSpinner />
-										Loading...
-									</>
-								) : (
-									action.label
-								)}
-							</button>
-						))}
-					</div>
-				</div>
-
-				{/* Footer */}
+				{/* Footer Section */}
 				{footer && (
 					<div className="text-center">
 						<p className="text-sm text-gray-600">
@@ -358,7 +269,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 							<Link
 								href={footer.link.href}
 								onClick={footer.link.onClick}
-								className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200"
+								className="font-medium text-[#770000] hover:text-[#550000] transition-colors duration-200"
 							>
 								{footer.link.label}
 							</Link>

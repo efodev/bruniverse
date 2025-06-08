@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Link from "next/link";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,12 +24,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
-    </html>
+		<html lang="en">
+			<body
+				className={`${geistSans.variable} ${geistMono.variable} antialiased w-screen h-screen`}
+			>
+				{children}
+				<footer>
+          <p
+          className="text-sm underline hover:text-[#550000] transition-colors duration-200 absolute right-5 bottom-5">
+						<Link
+							href={"/privacy-policy"}
+						>
+							Privacy|Terms
+						</Link>
+					</p>
+				</footer>
+			</body>
+		</html>
   );
 }

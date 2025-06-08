@@ -17,7 +17,7 @@ export interface FormField {
 export interface AuthAction {
   label: string;
   onClick: (formData: Record<string, string>) => void | Promise<void>;
-  variant?: 'primary' | 'secondary' | 'outline';
+  variant?: 'primary' | 'secondary';
   loading?: boolean;
 }
 
@@ -31,8 +31,7 @@ export interface AuthFormProps {
   title: string;
   subtitle?: string;
   fields: FormField[];
-  primaryAction: AuthAction;
-  secondaryActions?: AuthAction[];
+  buttonAction: AuthAction;
   links?: AuthLink[];
   footer?: {
     text: string;
@@ -41,11 +40,6 @@ export interface AuthFormProps {
   className?: string;
   formClassName?: string;
   showPasswordToggle?: boolean;
-  socialProviders?: {
-    name: string;
-    icon: React.ComponentType<{ className?: string }>;
-    onClick: () => void;
-  }[];
 }
 
 /// Navigation item interface
