@@ -57,7 +57,6 @@ export interface NavigationProps {
   variant?: "default" | "glass" | "minimal";
   logo?: React.ReactNode;
   userSection?: React.ReactNode;
-  logoutSection?: NavItem[]; // Items to show when user is logged out
   showSearch?: boolean;
   showNotifications?: boolean;
   onSearchClick?: () => void;

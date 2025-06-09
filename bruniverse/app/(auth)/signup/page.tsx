@@ -8,13 +8,13 @@ export default function SignupPage() {
     return (
 		<>
 			<AuthForm
-				title="Create Account"
-				subtitle="Sign up to get started with our platform"
+				title="Getting Started for an amazing Journey!"
+				subtitle="Sign up to Bruniverse"
 				fields={signupFields}
-				formClassName="bg-orange-50 rounded-lg bg-white p-6 shadow-lg"
-				className="fixed inset-0 overflow-hidden"
-				primaryAction={{
-					label: "Create Account",
+				formClassName=""
+				className="text-[#770000]"
+				buttonAction={{
+					label: "Sign Up",
 					onClick: async (data) => {
 						console.log("Signup data:", data);
 						// Handle signup logic

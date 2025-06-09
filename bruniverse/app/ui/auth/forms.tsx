@@ -133,22 +133,23 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 
 	return (
 		<div
-			className={`w-full space-y-6 flex flex-col justify-center items-center ${className}`}
+			className={` flex flex-col items-center justify-center space-y-4 ${className}`}
 		>
 			{/* Header Section */}
-			<div className="text-center space-y-2">
-				<h1 className="text-lg font-bold tracking-tight">{title}</h1>
-				{subtitle && (
-					<p className="text-md font-bold -mb-3 mt-6">{subtitle}</p>
-				)}
+			<div className="text-center space-y-2 mt-3">
+				<h1 className="text-2xl font-bold tracking-tight mt-1">
+					{title}
+				</h1>
+				{subtitle && <p className="text-lg font-bold">{subtitle}</p>}
 			</div>
 
 			{/* Form Section */}
 			<div
-				className={`w-4/5 bg-white rounded-xl shadow-sm border border-gray-200 p-8 space-y-6 ${styles.bgcolor} ${formClassName}`}
+				className={`min-w-1/3 bg-white rounded-xl shadow-sm border border-gray-200 p-8 space-y-3 ${styles.bgcolor}
+				 ${formClassName}`}
 			>
 				{/* Form Fields */}
-				<div className="space-y-5">
+				<div className="space-y-3">
 					{fields.map((field) => (
 						<div
 							key={field.id}
@@ -189,7 +190,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 										)
 									}
 									className={` ${styles.fieldbgcolor}
-                    block w-full px-4 py-3 border rounded-lg text-gray-900 
+                    block w-full px-3 py-2 border rounded-lg text-gray-900
                     placeholder-gray-500 focus:outline-none focus:ring-2 
                     focus:ring-[#770000] focus:border-transparent transition-all duration-200
                     ${field.icon ? "pl-10" : ""}
@@ -237,7 +238,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 
 				{/* Links Section */}
 				{links.length > 0 && (
-					<div className="flex justify-between text-sm">
+					<div className="text-sm">
 						{links.map((link, index) => (
 							<Link
 								key={index}
@@ -255,7 +256,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 				<button
 					type="submit"
 					onClick={() => handleSubmit(buttonAction)}
-					className={`w-2/5 py-3 px-12 flex justify-self-center 
+					className={`w-full px-4 py-3
 						${buttonVariants[buttonAction.variant || "primary"]}`}
 				>
 					{buttonAction.label}

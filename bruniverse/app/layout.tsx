@@ -26,17 +26,12 @@ export default function RootLayout({
   return (
 		<html lang="en">
 			<body
-				className={`${geistSans.variable} ${geistMono.variable} antialiased w-screen h-screen`}
+				className={`${geistSans.variable} ${geistMono.variable} antialiased min-w-dvh min-h-dvh font-sans`}
 			>
-				{children}
+				<>{children}</>
 				<footer>
-          <p
-          className="text-sm underline hover:text-[#550000] transition-colors duration-200 absolute right-5 bottom-5">
-						<Link
-							href={"/privacy-policy"}
-						>
-							Privacy|Terms
-						</Link>
+					<p className="fixed text-sm underline hover:text-[#550000] transition-colors duration-200 absolute right-5 bottom-5 overflow-hidden">
+						<Link href={"/privacy-policy"}>Privacy|Terms</Link>
 					</p>
 				</footer>
 			</body>
