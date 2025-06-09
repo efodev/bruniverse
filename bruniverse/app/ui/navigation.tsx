@@ -22,6 +22,8 @@ import {
 	NavBarProps
 } from "./definitions";
 import { useRouter } from "next/navigation";
+import Logo from "./util/images";
+import logoImage from "@/public/bear-logo.png"
 
 /**
  * Represents the customizable navagition component.
@@ -260,10 +262,10 @@ const Navigation: React.FC<NavigationProps> = ({
         ${getVariantStyles()} py-4 m-0
       `}
 			>
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div className="max-w-7xl px-4 sm:px-6 lg:px-8 mx-auto">
 					<div className="flex items-center justify-between">
 						{/* Logo */}
-						<div className="flex items-center">
+						<div className="self-start">
 							{logo || (
 								<div className="text-2xl font-bold text-gray-900 dark:text-white">
 									Logo
@@ -385,16 +387,15 @@ export const NavBar: React.FC<NavBarProps> = ({
 		},
 	];
 
-	const logo = (
-		<div className="flex items-center gap-3">
-			<div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-				<span className="text-white font-bold text-sm">N</span>
-			</div>
-			<span className="text-xl font-bold text-gray-900 dark:text-white">
-				NaviPro
-			</span>
-		</div>
-	);
+	const logo = <Logo
+		src={logoImage}
+		alt="Bruniverse Logo"
+		className=""
+		aspectRatio={2.5}
+		width={150}
+		height={150}
+		href="/"
+		/>
 
 	const userSection = user && (
 		<div className="flex items-center gap-3">

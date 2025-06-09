@@ -1,3 +1,5 @@
+import { StaticImageData } from "next/image";
+
 // Types
 export interface FormField {
   id: string;
@@ -76,4 +78,16 @@ export interface NavBarProps {
   showNotifications: boolean;
   position: "top" | "side";
   variant: "default" | "glass" | "minimal";
+}
+
+export interface LogoProps {
+  src: string | StaticImageData;
+	alt: string;
+	aspectRatio: number;
+	width?: number;
+	height?: number;
+	href?: string;
+	className?: string;
+	priority?: boolean;
+	quality?: number;
 }
