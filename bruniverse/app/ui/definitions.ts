@@ -91,3 +91,20 @@ export interface LogoProps {
 	priority?: boolean;
 	quality?: number;
 }
+
+export interface EmailVerificationProps {
+  /** Main title for the verification page */
+  title: string;
+  /** Subtitle/description text */
+  subtitle: string;
+  /** Additional CSS classes for styling customization */
+  className?: string;
+  /** Callback function when verification code is submitted */
+  onVerify?: (code: string) => void;
+  /** Callback function when resend code is requested */
+  onResendCode?: () => void;
+  /** Whether the verification is in loading state */
+  isLoading?: boolean;
+  /** Whether resend is in loading state */
+  isResending?: boolean;
+}
