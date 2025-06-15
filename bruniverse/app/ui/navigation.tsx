@@ -1,5 +1,5 @@
-/// app/ui/navigation 
-'use client';
+/// app/ui/navigation
+"use client";
 
 import React, { useState, useEffect } from "react";
 import {
@@ -15,29 +15,24 @@ import {
 	Sun,
 } from "lucide-react";
 
-import {
-	NavItem,
-	NavigationProps,
-	MyUser,
-	NavBarProps
-} from "./definitions";
+import { NavItem, NavigationProps, MyUser, NavBarProps } from "./definitions";
 import { useRouter } from "next/navigation";
 import Logo from "./util/images";
-import logoImage from "@/public/bear-logo.png"
+import logoImage from "@/public/bear_logo2.svg";
 
 /**
  * Represents the customizable navagition component.
- * 
+ *
  * @param NavigationProps interface
- * @returns 
+ * @returns
  */
 const Navigation: React.FC<NavigationProps> = ({
 	items, // a list of nav items to be displayed on the navigation bar
 	position = "top", // whether bar should be displayed on top or at the side
 	variant = "default",
-	logo, 
+	logo,
 	userSection, // to be displayed when user logs in
-	showSearch = false, 
+	showSearch = false,
 	showNotifications = false,
 	onSearchClick,
 	onNotificationClick,
@@ -73,7 +68,7 @@ const Navigation: React.FC<NavigationProps> = ({
 			case "glass":
 				return `${base} backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl`;
 			case "minimal":
-				return `${base} bg-transparent border-b border-gray-200 dark:border-gray-800 min-w-full`;
+				return `${base} bg-transparent border-gray-200 dark:border-gray-800 min-w-full`;
 			default:
 				return `${base} bg-white dark:bg-gray-900 shadow-lg dark:shadow-gray-900/20`;
 		}
@@ -99,12 +94,12 @@ const Navigation: React.FC<NavigationProps> = ({
 							}
 						}}
 						className={`
-              flex items-center gap-1 px-4 py-3 rounded-xl font-medium transition-all duration-200
-              hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105 hover:shadow-md
+              flex items-center gap-1 px-4 py-3 rounded-xl font-semibold transition-all duration-200
+              hover:bg-orange-200 hover:scale-105 hover:shadow-md text-md
               ${
 					activeItem === item.link
-						? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
-						: "text-black-700 hover:text-white"
+						? "bg-red-50 dark:bg-red-900/20 text-red-900"
+						: "text-[#342400] hover:text-[#770000]"
 				}
               ${isMobile ? "w-full justify-start" : ""}
             `}
@@ -186,10 +181,10 @@ const Navigation: React.FC<NavigationProps> = ({
 	// 			{/* Sidebar */}
 	// 			<div
 	// 				className={`
-    //       w-72 ${getVariantStyles()} 
-    //       ${isDarkMode ? "dark" : ""}
-    //       flex flex-col border-r border-gray-200 dark:border-gray-800
-    //     `}
+	//       w-72 ${getVariantStyles()}
+	//       ${isDarkMode ? "dark" : ""}
+	//       flex flex-col border-r border-gray-200 dark:border-gray-800
+	//     `}
 	// 			>
 	// 				{/* Logo section */}
 	// 				{logo && (
@@ -255,17 +250,17 @@ const Navigation: React.FC<NavigationProps> = ({
 
 	// Top navigation // Todo: Handle dark mode later.
 	return (
-		<header className={isDarkMode ? "dark" : ""}>
+		<header className={`${isDarkMode ? "dark" : ""}`}>
 			<div
 				className={`
         	top-0 left-0 right-0 z-50 transition-all duration-300
-        ${getVariantStyles()} py-4 m-0
+        ${getVariantStyles()} py-4 m-0 max-h-24
       `}
 			>
-				<div className="max-w-7xl px-4 sm:px-6 lg:px-8 mx-auto">
+				<div className="max-w-full px-4 sm:px-6 lg:px-8 mx-auto">
 					<div className="flex items-center justify-between">
 						{/* Logo */}
-						<div className="self-start">
+						<div className="p-0">
 							{logo || (
 								<div className="text-2xl font-bold text-gray-900 dark:text-white">
 									Logo
@@ -299,7 +294,7 @@ const Navigation: React.FC<NavigationProps> = ({
 							{/* Theme toggle */}
 							<button
 								onClick={() => setIsDarkMode(!isDarkMode)}
-								className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+								className="p-2 rounded-xl hover:bg-orange-200 hover:shadow-md transition-colors duration-200"
 							>
 								{isDarkMode ? (
 									<Sun className="w-5 h-5 text-gray-600 dark:text-gray-400" />
@@ -364,7 +359,7 @@ export const NavBar: React.FC<NavBarProps> = ({
 	showSearch,
 	showNotifications,
 	position,
-	variant
+	variant,
 }) => {
 	const handleSearchClick = () => {
 		alert("Search clicked!");
@@ -387,20 +382,22 @@ export const NavBar: React.FC<NavBarProps> = ({
 		},
 	];
 
-	const logo = <Logo
-		src={logoImage}
-		alt="Bruniverse Logo"
-		className=""
-		aspectRatio={2.5}
-		width={150}
-		height={150}
-		href="/"
+	const logo = (
+		<Logo
+			src={logoImage}
+			alt="Bruniverse Logo"
+			className="fixed w-36 h-24 top-px left-2 m-0 p-0"
+			aspectRatio={1}
+			width={150}
+			height={150}
+			href="/"
 		/>
+	);
 
 	const userSection = user && (
 		<div className="flex items-center gap-3">
 			<div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-				{ user?.avatar || (<User className="w-4 h-4 text-white" />)}
+				{user?.avatar || <User className="w-4 h-4 text-white" />}
 			</div>
 			<div className="hidden sm:block">
 				<div className="text-sm font-medium text-gray-900 dark:text-white">
@@ -414,17 +411,17 @@ export const NavBar: React.FC<NavBarProps> = ({
 	);
 	return (
 		<>
-		<Navigation
-			items={items}
-			position={position}
-			variant={variant}
-			logo={logo}
-			userSection={isLoggedIn ? userSection : undefined}
-			showSearch={showSearch}
-			showNotifications={showNotifications}
-			onSearchClick={handleSearchClick}
-			onNotificationClick={handleNotificationClick}
-		/>
+			<Navigation
+				items={items}
+				position={position}
+				variant={variant}
+				logo={logo}
+				userSection={isLoggedIn ? userSection : undefined}
+				showSearch={showSearch}
+				showNotifications={showNotifications}
+				onSearchClick={handleSearchClick}
+				onNotificationClick={handleNotificationClick}
+			/>
 		</>
 	);
-}
+};

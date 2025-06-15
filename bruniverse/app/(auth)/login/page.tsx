@@ -1,18 +1,17 @@
 /// app/(auth)/login/page.tsx
-'use client';
+"use client";
 import { signinFields } from "@/app/ui/auth/data";
 import { AuthForm } from "@/app/ui/auth/forms";
 
-
 /**
- *  
- * @returns 
+ *
+ * @returns
  */
 export default function LoginPage() {
-    return (
+	return (
 		<>
 			<AuthForm
-				title="Welcome Back to Bruniverse, Where you connect and find answers."
+				title={"Welcome Back to Bruniverse,\nWhere you connect and find answers."}
 				subtitle="Login to Bruniverse"
 				fields={signinFields}
 				className="text-[#770000]"
@@ -40,5 +39,4 @@ export default function LoginPage() {
 			/>
 		</>
 	);
-        
 }

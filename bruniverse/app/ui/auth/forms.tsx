@@ -1,15 +1,15 @@
 // app/ui/auth/signin.tsx
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import { AuthFormProps, AuthAction, FormField } from '../definitions';
+import React, { useState } from "react";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { AuthFormProps, AuthAction, FormField } from "../definitions";
 import { montserrat } from "@/app/ui/fonts";
-import Link from 'next/link';
+import Link from "next/link";
 import styles from "@/app/(auth)/auth.module.css";
 
 // Button variants
-// Todo: Probably move button to the 
+// Todo: Probably move button to the
 const buttonVariants = {
 	primary:
 		"bg-[#770000] text-white font-semibold rounded-lg hover:bg-[#550000] focus:outline-none focus:ring-2 focus:ring-[#770000] focus:ring-offset-2 transition-colors duration-200",
@@ -18,15 +18,15 @@ const buttonVariants = {
 };
 
 export const AuthForm: React.FC<AuthFormProps> = ({
-  title,
-  subtitle,
-  fields,
-  buttonAction,
-  links = [],
-  footer,
-  className = "",
-  formClassName = "",
-  showPasswordToggle = true,
+	title,
+	subtitle,
+	fields,
+	buttonAction,
+	links = [],
+	footer,
+	className = "",
+	formClassName = "",
+	showPasswordToggle = true,
 }) => {
 	const [formData, setFormData] = useState<Record<string, string>>({});
 	const [errors, setErrors] = useState<Record<string, string>>({});
@@ -136,11 +136,14 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 			className={` flex flex-col items-center justify-center space-y-4 ${className}`}
 		>
 			{/* Header Section */}
-			<div className="text-center space-y-2 mt-3">
-				<h1 className="text-2xl font-bold tracking-tight mt-1">
+			<div className="space-y-2 mt-3">
+				<h1
+					className="font-bold whitespace-pre-line mt-1 text-6xl
+					 leading-[100%] tracking-tight text-left"
+				>
 					{title}
 				</h1>
-				{subtitle && <p className="text-lg font-bold">{subtitle}</p>}
+				{subtitle && <p className="text-lg font-bold text-center">{subtitle}</p>}
 			</div>
 
 			{/* Form Section */}
@@ -281,5 +284,3 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 		</div>
 	);
 };
-
-

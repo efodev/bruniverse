@@ -40,7 +40,7 @@ export default function Logo({
 			alt={alt}
 			width={finalWidth}
 			height={finalHeight}
-			className={`object-contain w-15 h-9 rounded-full z-10 p-0 m-0 ${className}`}
+			className={`object-contain rounded-full p-0 m-0 ${className}`}
 			priority={priority}
 			quality={quality}
 		/>
