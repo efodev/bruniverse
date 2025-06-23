@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 export default function SignupPage() {
 	// route to the verification page
 	const router = useRouter();
-
 	/**
 	 * Handles the submission of signup form.
 	 * First validates that passwords confirmation is correct
