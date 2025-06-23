@@ -4,6 +4,19 @@ import { AuthForm, } from "@/app/ui/auth/forms";
 import { signupFields } from "@/app/ui/auth/data";
 
 export default function SignupPage() {
+	/**
+	 * Handles the submission of signup form.
+	 * First validates that passwords confirmation is correct
+	 * @param formData form inputs
+	 */
+	const handleClick = async (formData: Record<string, string>) => {
+		// Verify that user cor1rectly confirms password
+		 if (formData?.password !== formData?.confirmPassword) {
+			throw new Error("passwords don't match");
+		}
+		console.log(formData);
+
+	}
 
     return (
 		<>
@@ -15,10 +28,7 @@ export default function SignupPage() {
 				className="text-[#770000]"
 				buttonAction={{
 					label: "Sign Up",
-					onClick: async (data) => {
-						console.log("Signup data:", data);
-						// Handle signup logic
-					},
+					onClick: handleClick
 				}}
 				footer={{
 					text: "Already have an account?",

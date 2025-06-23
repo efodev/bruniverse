@@ -7,9 +7,9 @@
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     brown_email VARCHAR(255) UNIQUE NOT NULL,
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
-    display_name VARCHAR(100),
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    display_name VARCHAR(100) NOT NULL,
     profile_picture_url TEXT,
     bio TEXT,
     graduation_year INTEGER,
@@ -19,7 +19,9 @@ CREATE TABLE users (
     is_active BOOLEAN DEFAULT true,
     email_verified BOOLEAN DEFAULT false,
     duo_verified BOOLEAN DEFAULT false,
-    notification_preferences JSONB DEFAULT '{"email": true, "push": false}'
+    notification_preferences JSONB DEFAULT '{"email": true, "push": false}',
+    verification_code VARCHAR(6),
+    verification_expires BOOLEAN DEFAULT false
 );
 
 -- User tags/interests

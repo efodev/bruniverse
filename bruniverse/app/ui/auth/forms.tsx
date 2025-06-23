@@ -127,7 +127,12 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 		try {
 			await action.onClick(formData);
 		} catch (error) {
-			console.error("Auth action failed:", error);
+			if (error instanceof Error) {
+				setErrors((formData) => ({
+					...formData,
+					["confirmPassword"]: `Oopsie... ${error.message}`,
+				}));
+			}
 		}
 	};
 
@@ -138,8 +143,8 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 			{/* Header Section */}
 			<div className="space-y-2 mt-3">
 				<h1
-					className="font-bold whitespace-pre-line mt-1 text-6xl
-					 leading-[100%] tracking-tight text-left"
+					className="font-bold whitespace-pre-line mb-8 text-6xl
+					 leading-[100%] tracking-tight text-left py-4 px-3"
 				>
 					{title}
 				</h1>
