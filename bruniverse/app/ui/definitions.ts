@@ -81,8 +81,8 @@ export interface NavBarProps {
 }
 
 export interface LogoProps {
-  src: string | StaticImageData;
-	alt: string;
+  src?: string | StaticImageData;
+	alt?: string;
 	aspectRatio: number;
 	width?: number;
 	height?: number;

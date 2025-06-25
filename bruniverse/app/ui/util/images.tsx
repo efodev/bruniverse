@@ -1,12 +1,11 @@
 // app/ui/util/images.tsx
-'use client';
-import Image from 'next/image';
-import Link from 'next/link';   
-import  {LogoProps} from '../definitions';
-
+"use client";
+import Image from "next/image";
+import Link from "next/link";
+import { LogoProps } from "../definitions";
 export default function Logo({
-	src,
-	alt,
+	src = "/bear_logo2.svg",
+	alt = "bruniverse logo",
 	aspectRatio,
 	width,
 	height,
@@ -63,8 +62,8 @@ export default function Logo({
 
 //  Type for static imports
 type StaticImageData = {
-  src: string
-  height: number
-  width: number
-  placeholder?: string
-}
+	src: string;
+	height: number;
+	width: number;
+	placeholder?: string;
+};

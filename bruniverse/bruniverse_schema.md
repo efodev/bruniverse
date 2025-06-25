@@ -9,7 +9,8 @@ CREATE TABLE users (
     brown_email VARCHAR(255) UNIQUE NOT NULL,
     first_name VARCHAR(100),
     last_name VARCHAR(100),
-    display_name VARCHAR(100) NOT NULL,
+    username VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL,
     profile_picture_url TEXT,
     bio TEXT,
     graduation_year INTEGER,
@@ -20,7 +21,7 @@ CREATE TABLE users (
     email_verified BOOLEAN DEFAULT false,
     duo_verified BOOLEAN DEFAULT false,
     notification_preferences JSONB DEFAULT '{"email": true, "push": false}',
-    verification_code VARCHAR(6),
+    verification_code CHAR(6),
     verification_expires BOOLEAN DEFAULT false
 );
 
