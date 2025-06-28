@@ -90,7 +90,7 @@ export default function EmailVerification({
 			<div className="w-full">
 				{/* Header */}
 				<div className="text-center mb-8">
-					<h1 className="text-5xl font-bold text-[#770000] mt-12 mb-16">
+					<h1 className="text-5xl font-bold text-[#770000] mt-24 mb-16">
 						{title}
 					</h1>
 				</div>
