@@ -18,7 +18,7 @@ export const signupFields: FormField[] = [
 		placeholder: "Enter your email",
 		required: true,
 		validation: {
-			//pattern:  /^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?@brown\.edu$/,
+			pattern:  /^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?@brown\.edu$/,
 			message: "Please enter a valid Brown University email address",
 		},
 	},
@@ -31,6 +31,7 @@ export const signupFields: FormField[] = [
 		validation: {
 			minLength: 8,
 			message: "Password must be at least 8 characters long",
+			//pattern: /^(\s)*|(\s)$/
 		},
 	},
 	{

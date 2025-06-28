@@ -128,6 +128,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 			await action.onClick(formData);
 		} catch (error) {
 			if (error instanceof Error) {
+				console.trace(error.stack);
 				setErrors((formData) => ({
 					...formData,
 					["confirmPassword"]: `Oopsie... ${error.message}`,

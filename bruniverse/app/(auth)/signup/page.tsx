@@ -3,10 +3,12 @@
 
 import { AuthForm } from "@/app/ui/auth/forms";
 import { signupFields } from "@/app/ui/auth/data";
-import { useRouter } from "next/router";
-
+import { useRouter } from "next/navigation";
 
 export default function SignupPage() {
+	// route to the verification page
+	const router = useRouter();
+
 	/**
 	 * Handles the submission of signup form.
 	 * First validates that passwords confirmation is correct
@@ -32,9 +34,8 @@ export default function SignupPage() {
 		if (!signupResult.success) {
 			throw new Error(signupResult.message);
 		}
-		// route to the verification page
-		const router = useRouter();
-		const timer = setTimeout(() => router.push("/verify-email"), 3000);
+		const verificationCode = signupResponse
+		router.push("/verify_email");
 	};
 
 	return (
