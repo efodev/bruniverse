@@ -1,6 +1,7 @@
 /// @app/lib/auth/verify-email.ts
 import nodemailer from "nodemailer";
 import emailjs from "@emailjs/browser";
+import { randomBytes } from "crypto";
 
 // Create transporter with server-side env vars
 const transporter = nodemailer.createTransport({
@@ -65,4 +66,12 @@ export async function sendVerificationEmailJs(
 
 	console.error(emailjsResponse);
 	return emailjsResponse;
+}
+
+// Generate Alphanumeric OTP
+export function generateAlphanumericOTP(length = 6) {
+	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	const array = new Uint8Array(length);
+	crypto.getRandomValues(array);
+	return Array.from(array, (byte) => chars[byte % chars.length]).join("");
 }

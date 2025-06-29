@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
-import { EmailVerificationProps } from "@/app/ui/definitions";
+import {
+	EmailVerificationProps,
+	EmailVerificationResult,
+} from "@/app/ui/definitions";
 
 export default function EmailVerification({
 	title,
@@ -12,6 +15,7 @@ export default function EmailVerification({
 }: EmailVerificationProps) {
 	const [code, setCode] = useState<string[]>(Array(6).fill(""));
 	const [isComplete, setIsComplete] = useState(false);
+	const [error, setError] = useState("");
 	const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
 	// Handle input change
@@ -20,7 +24,7 @@ export default function EmailVerification({
 		if (value.length > 1) return;
 
 		// Only allow numbers
-		if (value && !/^\d$/.test(value)) return;
+		if (value && !/^(\d|[A-Z])$/.test(value)) return;
 
 		const newCode = [...code];
 		newCode[index] = value;
@@ -49,7 +53,7 @@ export default function EmailVerification({
 		e.preventDefault();
 		const pastedData = e.clipboardData.getData("text").slice(0, 6);
 
-		if (!/^\d+$/.test(pastedData)) return;
+		if (!/^(\d|[A-Z])+$/.test(pastedData)) return;
 
 		const newCode = Array(6).fill("");
 		for (let i = 0; i < pastedData.length && i < 6; i++) {
@@ -69,14 +73,20 @@ export default function EmailVerification({
 	// Handle verify button click
 	const handleVerify = () => {
 		if (isComplete && onVerify) {
-			onVerify(code.join(""));
+			const { success, message } = onVerify(code.join(""));
+			if (!success) {
+				setError(message);
+			}
 		}
 	};
 
 	// Handle resend code
 	const handleResendCode = () => {
 		if (onResendCode) {
-			onResendCode();
+			const { success, message } = onResendCode();
+			if (!success) {
+				setError(message);
+			}
 		}
 	};
 
@@ -86,7 +96,9 @@ export default function EmailVerification({
 	}, []);
 
 	return (
-		<div className={`overflow-hidden flex items-center justify-center p-4 ${className}`}>
+		<div
+			className={`overflow-hidden flex items-center justify-center p-4 ${className}`}
+		>
 			<div className="w-full">
 				{/* Header */}
 				<div className="text-center mb-8">
@@ -147,6 +159,9 @@ export default function EmailVerification({
 						>
 							{isResending ? "Sending..." : "Send Again"}
 						</button>
+						{error && (
+							<p className="text-sm text-red-500">{error}</p>
+						)}
 					</div>
 
 					{/* Verify Button */}

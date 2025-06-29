@@ -100,11 +100,16 @@ export interface EmailVerificationProps {
   /** Additional CSS classes for styling customization */
   className?: string;
   /** Callback function when verification code is submitted */
-  onVerify?: (code: string) => void;
+  onVerify?: (code: string) => EmailVerificationResult;
   /** Callback function when resend code is requested */
-  onResendCode?: () => void;
+  onResendCode?: () => EmailVerificationResult;
   /** Whether the verification is in loading state */
   isLoading?: boolean;
   /** Whether resend is in loading state */
   isResending?: boolean;
+}
+
+export interface EmailVerificationResult {
+  success: boolean;
+  message: string;
 }

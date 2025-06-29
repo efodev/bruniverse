@@ -24,6 +24,27 @@ CREATE TABLE users (
     verification_code CHAR(6),
     verification_expires BOOLEAN DEFAULT false
 );
+-- User Verification
+CREATE TABLE verifications (
+  id VARCHAR(25) PRIMARY KEY,
+  email VARCHAR(255) NOT NULL,
+  token VARCHAR(64) UNIQUE NOT NULL,
+  otp VARCHAR(10) NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  used BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  user_id UUID,
+
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Create indexes separately
+CREATE INDEX idx_token ON verifications (token);
+CREATE INDEX idx_email ON verifications (email);
+CREATE INDEX idx_expires_at ON verifications (expires_at);
+CREATE INDEX idx_user_id ON verifications (user_id);
+
 
 -- User tags/interests
 CREATE TABLE user_tags (
@@ -92,7 +113,7 @@ CREATE TABLE likes (
     CONSTRAINT unique_user_post_like UNIQUE(user_id, post_id),
     CONSTRAINT unique_user_comment_like UNIQUE(user_id, comment_id),
     CONSTRAINT like_target_check CHECK (
-        (post_id IS NOT NULL AND comment_id IS NULL) OR 
+        (post_id IS NOT NULL AND comment_id IS NULL) OR
         (post_id IS NULL AND comment_id IS NOT NULL)
     )
 );
@@ -149,7 +170,7 @@ CREATE TABLE moderation_reports (
     action_taken TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT report_target_check CHECK (
-        (post_id IS NOT NULL AND comment_id IS NULL) OR 
+        (post_id IS NOT NULL AND comment_id IS NULL) OR
         (post_id IS NULL AND comment_id IS NOT NULL)
     )
 );
@@ -184,6 +205,7 @@ CREATE INDEX idx_notifications_user ON notifications(user_id, is_read);
 ## Additional MVP Deliverables
 
 ### Authentication & Security
+
 - Brown SSO integration with Duo 2FA
 - Email verification system
 - Session management and JWT tokens
@@ -191,6 +213,7 @@ CREATE INDEX idx_notifications_user ON notifications(user_id, is_read);
 - CSRF protection
 
 ### Content Moderation System
+
 - Automated content filtering (profanity, spam detection)
 - Manual moderation queue for admins
 - User reporting system
@@ -198,6 +221,7 @@ CREATE INDEX idx_notifications_user ON notifications(user_id, is_read);
 - Appeal process for moderated content
 
 ### Search & Filtering
+
 - Full-text search across posts and comments
 - Category-based filtering
 - Date range filtering
@@ -205,18 +229,21 @@ CREATE INDEX idx_notifications_user ON notifications(user_id, is_read);
 - Trending posts algorithm
 
 ### Notification System
+
 - Email notifications for replies and mentions
 - In-app notification center
 - Digest emails (daily/weekly summaries)
 - Notification preferences management
 
 ### Mobile Responsiveness
+
 - Progressive Web App (PWA) capabilities
 - Touch-friendly interface
 - Offline reading capabilities
 - Mobile-optimized image handling
 
 ### Analytics & Insights
+
 - Post engagement metrics
 - User activity tracking
 - Popular categories and trends
@@ -225,11 +252,13 @@ CREATE INDEX idx_notifications_user ON notifications(user_id, is_read);
 ## Tech Stack Resources
 
 ### Next.js & TypeScript Resources
+
 - **Next.js Documentation**: https://nextjs.org/docs
 - **TypeScript with Next.js**: https://nextjs.org/docs/basic-features/typescript
 - **Next.js Examples**: https://github.com/vercel/next.js/tree/canary/examples
 
 ### UI Components & Libraries
+
 - **Tailwind CSS**: https://tailwindcss.com/
 - **shadcn/ui**: https://ui.shadcn.com/ (Beautiful, accessible components)
 - **Radix UI**: https://www.radix-ui.com/ (Headless UI primitives)
@@ -238,16 +267,19 @@ CREATE INDEX idx_notifications_user ON notifications(user_id, is_read);
 - **Zod**: https://zod.dev/ (Schema validation)
 
 ### Authentication
+
 - **NextAuth.js**: https://next-auth.js.org/
 - **Auth0**: https://auth0.com/
 - **Clerk**: https://clerk.com/
 
 ### Database & ORM
+
 - **Prisma**: https://www.prisma.io/ (Recommended ORM for TypeScript)
 - **Drizzle ORM**: https://orm.drizzle.team/
 - **TypeORM**: https://typeorm.io/
 
 ### Free Database Services for Testing
+
 - **Supabase**: https://supabase.com/ (PostgreSQL, generous free tier)
 - **PlanetScale**: https://planetscale.com/ (MySQL, serverless)
 - **Neon**: https://neon.tech/ (PostgreSQL, serverless)
@@ -256,21 +288,25 @@ CREATE INDEX idx_notifications_user ON notifications(user_id, is_read);
 - **Aiven**: https://aiven.io/ (30-day free trial)
 
 ### Real-time Features
+
 - **Socket.io**: https://socket.io/
 - **Pusher**: https://pusher.com/
 - **Ably**: https://ably.com/
 
 ### File Storage
+
 - **Vercel Blob**: https://vercel.com/storage/blob
 - **Cloudinary**: https://cloudinary.com/
 - **AWS S3**: https://aws.amazon.com/s3/
 
 ### Email Services
+
 - **Resend**: https://resend.com/ (Developer-friendly)
 - **SendGrid**: https://sendgrid.com/
 - **Mailgun**: https://www.mailgun.com/
 
 ### Deployment
+
 - **Vercel**: https://vercel.com/ (Seamless Next.js deployment)
 - **Netlify**: https://www.netlify.com/
 - **Railway**: https://railway.app/
@@ -285,6 +321,7 @@ CREATE INDEX idx_notifications_user ON notifications(user_id, is_read);
 6. **Phase 6 (Weeks 11-12)**: Polish UI, testing, and deployment preparation
 
 ## Security Considerations
+
 - Input sanitization and validation
 - SQL injection prevention (use parameterized queries)
 - XSS protection

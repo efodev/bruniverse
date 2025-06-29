@@ -44,7 +44,7 @@ export const generateVerificationEmailHTML = ({
               
               <div style="background-color: #f9fafb; border: 2px dashed #d1d5db; border-radius: 8px; padding: 20px; text-align: center; margin: 24px 0;">
                 <div style="font-size: 12px; color: #6b7280; margin: 0 0 8px 0;">Your verification code:</div>
-                <div class="code" style="font-size: 28px; font-family: 'Monserrat', monospace; font-weight: bold; color: #111827; letter-spacing: 2px; word-break: break-all;">${verificationCode}</div>
+                <div class="code" style="font-size: 28px; font-family: Monserrat, monospace; font-weight: bold; color: #111827; letter-spacing: 2px; word-break: break-all;">${verificationCode}</div>
                 <div style="font-size: 12px; color: #6b7280; margin: 8px 0 0 0;">This code expires in ${duration} minutes at ${expirationTime}</div>
               </div>
               

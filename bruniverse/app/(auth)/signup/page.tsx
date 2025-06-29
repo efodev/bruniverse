@@ -28,13 +28,13 @@ export default function SignupPage() {
 		});
 
 		// Get and verify that signup succeeded.
-		const signupResult = await signupResponse.json();
+		const { success, rows, message } = await signupResponse.json();
 
-		if (!signupResult.success) {
-			throw new Error(signupResult.message);
+		if (!success) {
+			throw new Error(message);
 		}
-		const verificationCode = signupResponse
-		router.push("/verify_email");
+
+		router.push(`/verify_email?user=${rows?.id}&token=${rows?.token}`);
 	};
 
 	return (

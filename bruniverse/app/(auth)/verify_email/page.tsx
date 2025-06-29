@@ -2,12 +2,13 @@
 "use client";
 
 import EmailVerification from "@/app/ui/auth/email_verification";
-import { useRouter } from "next/navigation";
+import {useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function EmailVerificationPage() {
-	const router = useRouter();
-	const token = "";
+	const searchParams = useSearchParams();
+	const token = searchParams.get('token');
+	const id = searchParams.get("id");
 	const [status, setStatus] = useState<"loading" | "success" | "error">(
 		"loading"
 	);
@@ -33,8 +34,8 @@ export default function EmailVerificationPage() {
 
 			if (result.success) {
 				setStatus("success");
-				setMessage("Email verified successfull");
-				setTimeout(() => router.push("/login"), 3000);
+				setMessage("Email verified successfully");
+				//setTimeout(() => router.push("/login"), 3000);
 			} else {
 				setStatus("error");
 				setMessage(
