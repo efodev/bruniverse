@@ -3,6 +3,7 @@ import {
 	EmailVerificationProps,
 	EmailVerificationResult,
 } from "@/app/ui/definitions";
+import { useRouter } from "next/navigation";
 
 export default function EmailVerification({
 	title,
@@ -16,18 +17,20 @@ export default function EmailVerification({
 	const [code, setCode] = useState<string[]>(Array(6).fill(""));
 	const [isComplete, setIsComplete] = useState(false);
 	const [error, setError] = useState("");
+	const [successMsg, setSuccessMsg] = useState("");
 	const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+	const router = useRouter();
 
 	// Handle input change
 	const handleInputChange = (index: number, value: string) => {
 		// Only allow single digit
 		if (value.length > 1) return;
 
-		// Only allow numbers
-		if (value && !/^(\d|[A-Z])$/.test(value)) return;
+		// Only allow alphanumeric
+		if (value && !/^(\d|[A-Za-z])+$/.test(value)) return;
 
 		const newCode = [...code];
-		newCode[index] = value;
+		newCode[index] = value.toUpperCase();
 
 		setCode(newCode);
 
@@ -71,23 +74,37 @@ export default function EmailVerification({
 	};
 
 	// Handle verify button click
-	const handleVerify = () => {
+	const handleVerify = async () => {
 		if (isComplete && onVerify) {
-			const { success, message } = onVerify(code.join(""));
+			const { success, message } = await onVerify(code.join(""));
+			// Console log code here;
+			console.log("code: ", code);
 			if (!success) {
 				setError(message);
+				return;
 			}
+			// Ideally route to login.
+			setSuccessMsg(message);
+			setTimeout(() => {
+				setSuccessMsg("");
+				router.push("/login");
+			}, 3000);
 		}
 	};
 
 	// Handle resend code
-	const handleResendCode = () => {
+	const handleResendCode = async () => {
+		isResending = true;
 		if (onResendCode) {
-			const { success, message } = onResendCode();
+			const { success, message } = await onResendCode();
 			if (!success) {
 				setError(message);
+				return;
 			}
+			setSuccessMsg("New code sent to your email.");
 		}
+
+		isResending = false;
 	};
 
 	// Focus first input on mount
@@ -160,7 +177,14 @@ export default function EmailVerification({
 							{isResending ? "Sending..." : "Send Again"}
 						</button>
 						{error && (
-							<p className="text-sm text-red-500">{error}</p>
+							<p className="text-sm font-bold text-red-500">
+								{error}
+							</p>
+						)}
+						{successMsg && (
+							<p className="text-sm font-bold text-green-500">
+								{successMsg}
+							</p>
 						)}
 					</div>
 
