@@ -45,7 +45,48 @@ CREATE INDEX idx_email ON verifications (email);
 CREATE INDEX idx_expires_at ON verifications (expires_at);
 CREATE INDEX idx_user_id ON verifications (user_id);
 
+-- New login_attempts table to track login security
+CREATE TABLE login_attempts (
+  id SERIAL PRIMARY KEY,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  email VARCHAR(255) NOT NULL, -- Store email for failed attempts even if user doesn't exist
+  success BOOLEAN NOT NULL,
+  ip_address INET,
+  user_agent TEXT,
+  attempted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+-- Create indexes separately (correct PostgreSQL syntax)
+CREATE INDEX idx_login_attempts_user_id ON login_attempts(user_id);
+CREATE INDEX idx_login_attempts_email ON login_attempts(email);
+CREATE INDEX idx_login_attempts_attempted_at ON login_attempts(attempted_at);
+CREATE INDEX idx_login_attempts_email_attempted ON login_attempts(email, attempted_at);
 
+-- Optional: login_sessions table for active session tracking
+CREATE TABLE login_sessions (
+  id SERIAL PRIMARY KEY,
+  user_id UUID UNIQUE REFERENCES users(id) ON DELETE CASCADE, -- UNIQUE for UPSERT
+  last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  session_token VARCHAR(255),
+  expires_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create indexes for login_sessions
+CREATE INDEX idx_login_sessions_token ON login_sessions(session_token);
+CREATE INDEX idx_login_sessions_expires ON login_sessions(expires_at);
+
+-- Optional: Add trigger to update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$ language 'plpgsql';
+
+CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+*/
 -- User tags/interests
 CREATE TABLE user_tags (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -53,7 +94,6 @@ CREATE TABLE user_tags (
     tag_name VARCHAR(50) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 -- Categories for posts
 CREATE TABLE categories (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

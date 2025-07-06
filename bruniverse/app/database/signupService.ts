@@ -38,6 +38,7 @@ export async function signupDb(request: Record<string, string>) {
 			message: "Account created successfully",
 		};
 	} catch (error) {
+		// Maybe handle all error in query??
 		if (error instanceof DatabaseError) {
 			const res = handleDatabaseError(error, null)!;
 			switch (res.error) {
@@ -54,6 +55,7 @@ export async function signupDb(request: Record<string, string>) {
 					return {
 						success: false,
 						message,
+						status: res.status,
 					};
 			}
 		} else if (error instanceof Error) {
@@ -61,6 +63,7 @@ export async function signupDb(request: Record<string, string>) {
 			return {
 				success: false,
 				message: "Something went wrong. Try again later ...",
+				status: 500, // Internal Server Error
 			};
 		}
 	}

@@ -14,7 +14,7 @@ export default function SignupPage() {
 	 * @param formData form inputs
 	 */
 	const handleClick = async (formData: Record<string, string>) => {
-		// Verify that user cor1rectly confirms password
+		// Verify that user correctly confirms password
 		if (formData?.password !== formData?.confirmPassword) {
 			throw new Error("passwords don't match");
 		}
@@ -31,7 +31,7 @@ export default function SignupPage() {
 		const { success, data, message } = await signupResponse.json();
 
 		if (!success) {
-			throw new Error(message);
+			return message || "Unexpected error occurred. Please try again.";
 		}
 
 		router.push(`/verify_email?user=${data?.id}&token=${data?.token}`);
@@ -47,7 +47,7 @@ export default function SignupPage() {
 				className="text-[#770000]"
 				buttonAction={{
 					label: "Sign Up",
-					onClick: handleClick,
+					onClick: async (formData) => await handleClick(formData),
 				}}
 				footer={{
 					text: "Already have an account?",

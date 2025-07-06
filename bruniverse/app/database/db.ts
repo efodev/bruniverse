@@ -1,3 +1,4 @@
+import { stat } from "fs";
 import {
 	Pool,
 	PoolClient,
@@ -154,6 +155,7 @@ class Database {
 export default Database.getInstance();
 
 // Centralized database error handler
+// TODO: Have centralized message for all errors
 export function handleDatabaseError(
 	error: DatabaseError,
 	token: string | null = null
@@ -173,6 +175,7 @@ export function handleDatabaseError(
 				success: false,
 				error: "DUPLICATE_ERROR",
 				constraint: error.constraint,
+				status: 409, // Conflict
 			};
 
 		case "23503": // Foreign key violation
@@ -181,6 +184,7 @@ export function handleDatabaseError(
 				success: false,
 				error: "REFERENCE_ERROR",
 				constraint: error.constraint,
+				status: 400, // Bad Request
 			};
 
 		case "40001": // Serialization failure
@@ -191,6 +195,7 @@ export function handleDatabaseError(
 				error: "CONCURRENT_ACCESS",
 				constraint: error.constraint,
 				retryable: true,
+				status: 409, // Conflict
 			};
 
 		case "42P01": // Undefined table
@@ -200,6 +205,7 @@ export function handleDatabaseError(
 				success: false,
 				error: "SCHEMA_ERROR",
 				constraint: error.constraint,
+				status: 500, // Internal Server Error
 			};
 
 		case "53300": // Too many connections
@@ -209,6 +215,7 @@ export function handleDatabaseError(
 				error: "CONNECTION_LIMIT",
 				constraint: error.constraint,
 				retryable: true,
+				status: 503, // Service Unavailable
 			};
 
 		default:
@@ -217,6 +224,7 @@ export function handleDatabaseError(
 				success: false,
 				error: "DATABASE_ERROR",
 				constraint: error.constraint,
+				status: 500, // Internal Server Error
 			};
 	}
 }

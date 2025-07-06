@@ -7,19 +7,21 @@ export async function verifyOTP(req: Record<string, string>) {
 	try {
 		// Execute the CTE query
 		const result = await db.query(verifyOTPWithCTE, [token, otp]);
-	
+
 		// Check row count and validate results
 		if (result.rows.length === 0) {
 			const logContext = {
 				success: false,
 				error: "INVALID_OTP",
 				message: "Invalid or expired verification code",
+				status: 400, // Bad Request
 			};
 			console.warn("Invalid OTP", logContext);
 			return {
 				success: false,
 				message: "Invalid or expired verification code",
 				data: {},
+				status: 400, // Bad Request
 			};
 		}
 
@@ -52,6 +54,7 @@ export async function verifyOTP(req: Record<string, string>) {
 				success: false,
 				message: "Verification partially failed",
 				data: {},
+				status: 500, // Internal Server Error
 			};
 		}
 
@@ -63,6 +66,7 @@ export async function verifyOTP(req: Record<string, string>) {
 				verificationId: row.verification_id,
 			},
 			message: "Email verified. Redirecting to login page.",
+			status: 200, // OK
 		};
 	} catch (error) {
 		// Handle DatabaseError instances
@@ -74,6 +78,7 @@ export async function verifyOTP(req: Record<string, string>) {
 						success: false,
 						message: "Verification already processed.",
 						data: {},
+						status: res.status || 409, // Conflict
 					};
 			}
 		}
@@ -91,6 +96,7 @@ export async function verifyOTP(req: Record<string, string>) {
 			success: false,
 			message: "Something went wrong! Try again later...",
 			data: {},
+			status: 500, // Internal Server Error
 		};
 	}
 }

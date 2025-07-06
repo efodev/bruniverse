@@ -33,6 +33,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 	const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>(
 		{}
 	);
+	const [authError, setAuthError] = useState<string>("");
 
 	/**
 	 * Updates form fields when user types in the values.
@@ -45,6 +46,9 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 		// Clear error when user starts typing
 		if (errors[fieldId]) {
 			setErrors((prev) => ({ ...prev, [fieldId]: "" }));
+		}
+		if (authError) {
+			setAuthError(""); // Clear auth error when user starts typing
 		}
 	};
 	/**
@@ -125,14 +129,17 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 		if (!validateForm()) return;
 
 		try {
-			await action.onClick(formData);
+			const errorMessage = await action.onClick(formData);
+			if (errorMessage) {
+				setAuthError(errorMessage);
+			} else {
+				setAuthError(""); // Clear error if submission is successful
+			}
+			// Reset form data and errors on successful submission
 		} catch (error) {
 			if (error instanceof Error) {
 				console.trace(error.stack);
-				setErrors((formData) => ({
-					...formData,
-					["confirmPassword"]: `Oopsie... ${error.message}`,
-				}));
+				setAuthError("Unexpected error occcured. Please try again.");
 			}
 		}
 	};
@@ -149,7 +156,9 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 				>
 					{title}
 				</h1>
-				{subtitle && <p className="text-lg font-bold text-center">{subtitle}</p>}
+				{subtitle && (
+					<p className="text-lg font-bold text-center">{subtitle}</p>
+				)}
 			</div>
 
 			{/* Form Section */}
@@ -158,6 +167,11 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 				 ${formClassName}`}
 			>
 				{/* Form Fields */}
+				{authError && (
+					<p className="text-sm text-red-600 font-bold shadow-md p-1 text-center">
+						{authError}
+					</p>
+				)}
 				<div className="space-y-3">
 					{fields.map((field) => (
 						<div

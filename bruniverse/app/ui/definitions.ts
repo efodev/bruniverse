@@ -18,7 +18,7 @@ export interface FormField {
 
 export interface AuthAction {
 	label: string;
-	onClick: (formData: Record<string, string>) => void | Promise<void>;
+	onClick: (formData: Record<string, string>) => string | Promise<void>;
 	variant?: "primary" | "secondary";
 	loading?: boolean;
 }

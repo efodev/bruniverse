@@ -150,4 +150,46 @@ FROM new_user nu
 CROSS JOIN new_verification nv;
 `;
 
-// Break down queries tomorrow.
+// Query to get user by email
+export const userByEmailTransact = `
+    SELECT 
+      id,
+      username,
+      brown_email,
+      password,
+      is_active,
+      email_verified,
+      created_at
+    FROM users 
+    WHERE LOWER(brown_email) = LOWER($1)
+    LIMIT 1
+  `;
+
+// Query to get Login Attempts
+export const getLoginAttemptsTransact = `
+	  SELECT 
+      COUNT(*) FILTER (WHERE success = false AND attempted_at > NOW() - INTERVAL '30 minutes') as recent_failed_attempts,
+      MAX(attempted_at) FILTER (WHERE success = false) as last_failed_attempt,
+      MAX(attempted_at) FILTER (WHERE success = true) as last_successful_login,
+      COUNT(*) FILTER (WHERE success = false AND attempted_at > NOW() - INTERVAL '15 minutes') as failed_attempts_15min
+	  FROM login_attempts 
+	  WHERE LOWER(email) = LOWER($1)
+	`;
+
+export const logLoginAttemptsTransact = `
+	  INSERT INTO login_attempts (user_id, email, success, ip_address, user_agent, attempted_at)
+	  VALUES ($1, $2, $3, $4, $5, NOW())
+	  RETURNING id, attempted_at
+	`;
+
+// Query to update last user login for login transactions
+export const updateLastLoginTransact = `
+INSERT INTO login_sessions (user_id, last_login)
+VALUES ($1, NOW())
+ON CONFLICT (user_id) 
+DO UPDATE SET 
+last_login = NOW(),
+session_token = NULL,
+expires_at = NULL
+RETURNING last_login
+`;
