@@ -26,16 +26,12 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
+		<html lang="en"
+		className="text-base">
 			<body
 				className={`${montserrat.className} antialiased min-w-dvh min-h-dvh font-sans`}
 			>
 				<>{children}</>
-				<footer>
-					<p className="fixed text-sm underline hover:text-[#550000] transition-colors duration-200 absolute right-5 bottom-5 overflow-hidden">
-						<Link href={"/privacy-policy"}>Privacy|Terms</Link>
-					</p>
-				</footer>
 			</body>
 		</html>
 	);
