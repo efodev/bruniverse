@@ -1,5 +1,5 @@
 "use client";
-import PostingUI from "@/app/ui/post/create";
+import { PostCreationModal } from "@/app/ui/post/create";
 import { NavBar } from "@/app/ui/navigation";
 
 export default function NewPostPage() {
@@ -13,7 +13,10 @@ export default function NewPostPage() {
 				showNotifications={true}
 				showSearch={true}
 			/>
-			<PostingUI />
+			<PostCreationModal
+				onClose={() => console.log("closed")}
+				onPost={({}) => console.log("posted")}
+			/>
 		</>
 	);
 }
