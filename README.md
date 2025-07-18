@@ -5,4 +5,10 @@
 - Send client release to db service classes and remove finally from query method.
 
 
+## Todo: Main Posting page
+- Create interface for comments that removes the category
+- Refactor reaction icons into a ReactIcons component that should be absolutely postioned
+- Make one category per post
+- User can add tags below their questions
+
 

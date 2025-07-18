@@ -55,17 +55,17 @@ interface LeftSidebarProps {
 	selectedPost: Post | null;
 	onPostSelect: (post: Post) => void;
 }
-interface Post {
+export interface Post {
 	id: string;
 	title: string;
 	content: string;
-	categories: string[];
+	category: string;
 	author: string;
 	timestamp: string;
 	likes: number;
 	comments: Post[];
 }
-const LeftSidebar = ({
+export const LeftSidebar = ({
 	onCategoryChange,
 	posts,
 	selectedPost,
@@ -192,15 +192,13 @@ const LeftSidebar = ({
 								{post.author.charAt(0)}
 							</div>
 							<div className="flex-1 min-w-0">
-								<h4 className="font-medium text-amber-900 truncate">
+								<h4 className="font-medium truncate">
 									{post.title}
 								</h4>
-								<p className="text-sm text-amber-600 mt-1">
-									by {post.author}
-								</p>
+								<p className="text-sm mt-1">by {post.author}</p>
 								<div className="flex items-center space-x-2 mt-2">
-									<span className="inline-block bg-amber-100 text-amber-800 px-2 py-1 rounded text-xs font-medium">
-										{post.categories}
+									<span className="inline-block bg-amber-100 px-2 py-1 rounded text-xs font-medium">
+										{post.category}
 									</span>
 									<span className="text-xs text-amber-600">
 										#{post.id}
@@ -216,7 +214,7 @@ const LeftSidebar = ({
 };
 
 // Right Content Area Component
-const RightContentArea = ({
+export const RightContentArea = ({
 	selectedPost,
 	style = "",
 }: {
@@ -254,23 +252,21 @@ const RightContentArea = ({
 				</div>
 				<div className="flex-1">
 					<div className="flex items-center space-x-3 mb-2">
-						<h3 className="font-semibold text-amber-900">
-							{selectedPost.author}
-						</h3>
-						<span className="text-sm text-amber-600">
+						<h3 className="font-semibold">{selectedPost.author}</h3>
+						<span className="text-sm ">
 							{selectedPost.timestamp}
 						</span>
 					</div>
-					<div className="inline-block bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm font-medium mb-3">
-						{selectedPost.categories}
+					<div className="inline-block bg-amber-100 px-3 py-1 rounded-full text-sm font-medium mb-3">
+						{selectedPost.category}
 					</div>
-					<h2 className="text-xl font-bold text-amber-900 mb-4 flex items-center">
+					<h2 className="text-xl font-black text-[#5D3B28] mb-4 flex items-center">
 						{selectedPost.title}
 						<span className="ml-3 text-sm text-amber-600 font-normal">
 							#{selectedPost.id}
 						</span>
 					</h2>
-					<div className="text-amber-800 space-y-2 mb-4">
+					<div className=" space-y-2 mb-4 text-base font-semibold">
 						{selectedPost.content
 							.split("\n")
 							.map((paragraph, index) => (
@@ -322,7 +318,7 @@ const RightContentArea = ({
 						</div>
 						<div className="flex-1">
 							<div className="flex items-center space-x-2 mb-1">
-								<span className="font-medium text-amber-900">
+								<span className="font-medium">
 									{comment.author}
 								</span>
 								<div className="flex space-x-2">
@@ -334,7 +330,7 @@ const RightContentArea = ({
 									</button>
 								</div>
 							</div>
-							<p className="text-amber-800 text-sm leading-relaxed">
+							<p className="text-sm font-normal leading-relaxed">
 								{comment.content}
 							</p>
 						</div>
@@ -366,7 +362,7 @@ const Post = ({ post }: { post: Post }) => {
 						</span>
 					</div>
 					<div className="inline-block bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm font-medium mb-3">
-						{post.categories}
+						{post.category}
 					</div>
 					<h2 className="text-xl font-bold text-amber-900 mb-4 flex items-center">
 						{post.title}
@@ -444,159 +440,3 @@ const Post = ({ post }: { post: Post }) => {
 		</div>
 	);
 };
-
-// Main App Component
-const MainPostPage = () => {
-	const [activeCategory, setActiveCategory] = useState("all");
-	const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-
-	const navItems = [
-		{
-			label: "About",
-			style: "hover:text-amber-700 absolute top-[6.9vh] left-[22.74vw] font-extrabold text-3xl tracking",
-			action: () => console.log("About clicked"),
-			link: "/About",
-		},
-		{
-			label: "Team",
-			style: "hover:text-amber-700 absolute top-[6.9vh] left-[33.21vw] font-extrabold text-3xl tracking",
-			action: () => console.log("Team clicked"),
-			link: "/Team",
-		},
-	];
-
-	const categories = [
-		{ id: "all", name: "All" },
-		{ id: "categories", name: "Categories" },
-		{ id: "yours", name: "Yours" },
-		{ id: "starred", name: "Starred" },
-		{ id: "on-campus", name: "On-campus Questions" },
-		{ id: "off-campus", name: "Off-campus Questions" },
-		{ id: "find-people", name: "Find people" },
-		{ id: "promotion", name: "Promotion" },
-		{ id: "life-trivia", name: "Life Trivia" },
-		{ id: "other", name: "Other" },
-	];
-
-	const posts = [
-		{
-			id: "170",
-			title: "Looking for Internship Advice",
-			author: "Melody Chen",
-			timestamp: "2 days ago",
-			categories: ["questions"],
-			likes: 0,
-			content: `Hey everyone! 👋\nHope you're all doing great! I'm currently starting to think about internships and wanted to ask for some advice from folks who've been through the process. I'm especially interested in roles related to creative tech, product design, music + AI.\nFeel free to drop any advice here or DM me — I really appreciate it! 🙏\nThanks in advance!!`,
-			comments: [
-				{
-					id: "1",
-					title: "",
-					content:
-						"Hi! I'm here offering some advice. I would say talk to people from both the CS department and Music Department at Brown. Also, there's a lab doing Music generation here. This is the link https://musicgen.com. Check it out and hope it helps!",
-					categories: [],
-					author: "Bruce Liang",
-					timestamp: "",
-					likes: 0,
-					comments: [],
-				},
-			],
-		},
-		{
-			id: "169",
-			title: "Study Group for CS150",
-			author: "Alex Kim",
-			timestamp: "1 day ago",
-			categories: ["on-campus"],
-			likes: 0,
-			content: `Looking for people to form a study group for CS150. We can meet twice a week to go over problem sets and prepare for exams together.`,
-			comments: [
-				{
-					id: "2",
-					title: "",
-					content: "I'm interested! What days work best for you?",
-					categories: [],
-					author: "Sarah Johnson",
-					timestamp: "",
-					likes: 0,
-					comments: [],
-				},
-				{
-					id: "3",
-					title: "",
-					content:
-						"Count me in. I'm free Tuesday and Thursday evenings.",
-					categories: [],
-					author: "Mike Davis",
-					timestamp: "",
-					likes: 0,
-					comments: [],
-				},
-			],
-		},
-		{
-			id: "168",
-			title: "Best Coffee Shops Near Campus",
-			author: "Emma Wilson",
-			timestamp: "3 days ago",
-			categories: ["life-trivia"],
-			likes: 0,
-			content: `New to the area and looking for good coffee shops to study at. Any recommendations for places with good wifi and a quiet atmosphere?`,
-			comments: [
-				{
-					id: "4",
-					title: "",
-					content:
-						"Blue State Coffee is great! They have excellent wifi and plenty of seating.",
-					categories: [],
-					author: "David Brown",
-					timestamp: "",
-					likes: 0,
-					comments: [],
-				},
-			],
-		},
-	];
-
-	return (
-		<div className="fixed min-h-dvh min-w-dvw bg-amber-25">
-			<PostNavigation
-				logo={{ show: true, position: "left", src: "" }}
-				menuButton={{
-					show: true,
-					position: "left",
-					style: "absolute top-[6.9vh] left-[3vw] w-15 h-15 ",
-				}}
-				navItems={navItems}
-				searchBar={{
-					show: true,
-					position: "center",
-					placeholder: "Search Posts",
-					style: "absolute left-[43.92vw] top-[6.31vh] h-[6.39vh] w-[39.12vw]",
-				}}
-				userSection={{ show: true, position: "right", style: `` }}
-			/>
-
-			<div className="absolute top-[15vh] w-full h-[80vh] py-3 px-3">
-				<div className="flex gap-6 divide-x divide-[#00000036]">
-					<LeftSidebar
-						onCategoryChange={setActiveCategory}
-						posts={posts}
-						selectedPost={selectedPost}
-						onPostSelect={setSelectedPost}
-					/>
-
-					<RightContentArea
-						selectedPost={selectedPost}
-						style={"w-[60%]"}
-					/>
-				</div>
-			</div>
-			{/* Floating Action Button */}
-			<button className="absolute bottom-8 left-[36.63vw] w-15 h-15 bg-amber-800 hover:bg-amber-900 text-white rounded-full flex items-center justify-center shadow-lg transition-colors">
-				<Plus size={50} />
-			</button>
-		</div>
-	);
-};
-
-export default MainPostPage;

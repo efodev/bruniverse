@@ -434,7 +434,7 @@ interface PostNavigationProps {
 	menuButton: { show: boolean; position?: position; style?: string };
 	navItems: NavItem[];
 	searchBar: {
-		show: true;
+		show: boolean;
 		position?: position;
 		placeholder?: string;
 		style?: string;
@@ -468,8 +468,10 @@ export const PostNavigation = ({
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 
 	const renderLogo = () => (
-		<div className="flex items-center"
-		key='logo'>
+		<div
+			className="flex items-center"
+			key="logo"
+		>
 			{logo.src ? <Logo className={logo.style} /> : bearLogo}
 		</div>
 	);
@@ -480,20 +482,21 @@ export const PostNavigation = ({
 			onClick={() => setIsMenuOpen(!isMenuOpen)}
 			className={`flex items-center p-2 hover:bg-amber-50 rounded-lg transition-colors block ${menuButton.style}`}
 		>
-			<Menu
-				className="text-amber-900 w-full h-full"
-			/>
+			<Menu className="text-amber-900 w-full h-full" />
 		</button>
 	);
 
 	const renderNavItems = () => (
-		<div className="hidden md:flex items-center space-x-8" key="nav-items">
+		<div
+			className="hidden md:flex items-center space-x-8"
+			key="nav-items"
+		>
 			{navItems.map((item, index) => (
 				<button
 					key={index}
 					onClick={item.action}
 					className={`font-medium transition-colors ${item.style || "text-amber-900 hover:text-amber-700"}`}
-				> 
+				>
 					{item.label}
 				</button>
 			))}
@@ -501,7 +504,10 @@ export const PostNavigation = ({
 	);
 
 	const renderSearchBar = () => (
-		<div className="flex-1 max-w-md mx-4" key="search">
+		<div
+			className="flex-1 max-w-md mx-4"
+			key="search"
+		>
 			<div className={`${searchBar.style}`}>
 				<Search
 					className={`absolute left-3 top-1/3 transform -translate-y-1/2 w-[5%] h-[39%]`}
@@ -522,8 +528,10 @@ export const PostNavigation = ({
 			avatar: "/",
 		};
 		return (
-			<div className="flex flex-col items-center space-y-1 absolute top-[3vh] right-[4vw]"
-			key="user">
+			<div
+				className="flex flex-col items-center space-y-1 absolute top-[3vh] right-[4vw]"
+				key="user"
+			>
 				<div
 					className={`w-20 h-20 bg-[#713F12] rounded-full flex items-center justify-center
 						 text-white font-medium text-6xl ${inter.className} ${userSection.style}`}
