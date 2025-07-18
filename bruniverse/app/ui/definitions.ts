@@ -50,6 +50,8 @@ export interface NavItem {
 	link: string;
 	icon?: React.ReactNode;
 	children?: NavItem[];
+	style?: string;
+	action?: () => void;
 }
 
 // Navigation component props
@@ -68,7 +70,7 @@ export interface NavigationProps {
 export interface MyUser {
 	username: string;
 	email?: string;
-	avatar: React.ReactNode;
+	avatar?: React.ReactNode;
 }
 
 export interface NavBarProps {
@@ -83,7 +85,7 @@ export interface NavBarProps {
 export interface LogoProps {
 	src?: string | StaticImageData;
 	alt?: string;
-	aspectRatio: number;
+	aspectRatio?: number;
 	width?: number;
 	height?: number;
 	href?: string;

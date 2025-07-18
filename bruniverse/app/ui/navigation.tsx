@@ -19,6 +19,32 @@ import { NavItem, NavigationProps, MyUser, NavBarProps } from "./definitions";
 import { useRouter } from "next/navigation";
 import Logo from "./util/images";
 import logoImage from "@/public/bear_logo2.svg";
+import { inter } from "./fonts";
+
+const items: NavItem[] = [
+	{
+		label: "About",
+		link: "/about",
+		icon: <User className="w-4 h-4" />,
+	},
+	{
+		label: "Sign Up",
+		link: "/signup",
+		icon: <Settings className="w-4 h-4" />,
+	},
+];
+
+const bearLogo = (
+	<Logo
+		src={logoImage}
+		alt="Bruniverse Logo"
+		className="absolute w-[11.47vw] h-[12.19vh] top-[3vh] left-[8.96vw] m-0 p-0 box-border"
+		aspectRatio={1}
+		width={150}
+		height={150}
+		href="/"
+	/>
+);
 
 /**
  * Represents the customizable navagition component.
@@ -307,13 +333,13 @@ const Navigation: React.FC<NavigationProps> = ({
 							{userSection
 								? userSection
 								: items &&
-								  items.length > 0 && (
+									items.length > 0 && (
 										<nav className="hidden md:flex items-center space-x-2">
 											{items.map((item) =>
 												renderNavItem(item)
 											)}
 										</nav>
-								  )}
+									)}
 
 							{/* Mobile menu button */}
 							<button
@@ -369,31 +395,6 @@ export const NavBar: React.FC<NavBarProps> = ({
 		alert("Notifications clicked!");
 	};
 
-	const items: NavItem[] = [
-		{
-			label: "About",
-			link: "/about",
-			icon: <User className="w-4 h-4" />,
-		},
-		{
-			label: "Sign Up",
-			link: "/signup",
-			icon: <Settings className="w-4 h-4" />,
-		},
-	];
-
-	const logo = (
-		<Logo
-			src={logoImage}
-			alt="Bruniverse Logo"
-			className="fixed w-36 h-24 top-px left-2 m-0 p-0"
-			aspectRatio={1}
-			width={150}
-			height={150}
-			href="/"
-		/>
-	);
-
 	const userSection = user && (
 		<div className="flex items-center gap-3">
 			<div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
@@ -415,7 +416,7 @@ export const NavBar: React.FC<NavBarProps> = ({
 				items={items}
 				position={position}
 				variant={variant}
-				logo={logo}
+				logo={bearLogo}
 				userSection={isLoggedIn ? userSection : undefined}
 				showSearch={showSearch}
 				showNotifications={showNotifications}
@@ -423,5 +424,149 @@ export const NavBar: React.FC<NavBarProps> = ({
 				onNotificationClick={handleNotificationClick}
 			/>
 		</>
+	);
+};
+
+export // Navigation Component with flexible positioning
+type position = "left" | "center" | "right";
+interface PostNavigationProps {
+	logo: { show: boolean; position?: position; src: string; style?: string };
+	menuButton: { show: boolean; position?: position; style?: string };
+	navItems: NavItem[];
+	searchBar: {
+		show: true;
+		position?: position;
+		placeholder?: string;
+		style?: string;
+	};
+	userSection: {
+		show: boolean;
+		position?: position;
+		style?: string;
+		user?: MyUser;
+	};
+	className?: string;
+}
+
+/**
+ * Second Navigation bar, currently used for post page. This will be updated to
+ * accommodate
+ * @param param
+ * @returns
+ */
+export const PostNavigation = ({
+	logo = { show: true, position: "left", src: "" },
+	menuButton = { show: true, position: "left" },
+	navItems = [],
+	searchBar = { show: true, position: "center", placeholder: "Search Posts" },
+	userSection = {
+		show: true,
+		position: "right",
+	}, // handle avatars later
+	className = "",
+}: PostNavigationProps) => {
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+	const renderLogo = () => (
+		<div className="flex items-center"
+		key='logo'>
+			{logo.src ? <Logo className={logo.style} /> : bearLogo}
+		</div>
+	);
+
+	const renderMenuButton = () => (
+		<button
+			key="menu"
+			onClick={() => setIsMenuOpen(!isMenuOpen)}
+			className={`flex items-center p-2 hover:bg-amber-50 rounded-lg transition-colors block ${menuButton.style}`}
+		>
+			<Menu
+				className="text-amber-900 w-full h-full"
+			/>
+		</button>
+	);
+
+	const renderNavItems = () => (
+		<div className="hidden md:flex items-center space-x-8" key="nav-items">
+			{navItems.map((item, index) => (
+				<button
+					key={index}
+					onClick={item.action}
+					className={`font-medium transition-colors ${item.style || "text-amber-900 hover:text-amber-700"}`}
+				> 
+					{item.label}
+				</button>
+			))}
+		</div>
+	);
+
+	const renderSearchBar = () => (
+		<div className="flex-1 max-w-md mx-4" key="search">
+			<div className={`${searchBar.style}`}>
+				<Search
+					className={`absolute left-3 top-1/3 transform -translate-y-1/2 w-[5%] h-[39%]`}
+				/>
+				<input
+					type="text"
+					placeholder={searchBar.placeholder}
+					className="w-full pl-15 pr-4 py-2 bg-[#CC810033] border border-amber-200 rounded-full focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent text-#808080"
+				/>
+			</div>
+		</div>
+	);
+
+	const renderUserSection = () => {
+		const { username, email, avatar } = userSection.user || {
+			username: "Bruno",
+			email: "@brown.edu",
+			avatar: "/",
+		};
+		return (
+			<div className="flex flex-col items-center space-y-1 absolute top-[3vh] right-[4vw]"
+			key="user">
+				<div
+					className={`w-20 h-20 bg-[#713F12] rounded-full flex items-center justify-center
+						 text-white font-medium text-6xl ${inter.className} ${userSection.style}`}
+				>
+					{username ? username[0].toLocaleUpperCase() : "B"}
+				</div>
+				<div className="hidden md:block text-center">
+					<div className="text-sm font-medium text-amber-900">
+						{username || "Bruno"}
+					</div>
+					<div className="text-xs text-amber-600">ID: 652397</div>
+				</div>
+			</div>
+		);
+	};
+
+	const leftItems = [];
+	const centerItems = [];
+	const rightItems = [];
+
+	// Position items based on configuration
+	if (logo.show && logo.position === "left") leftItems.push(renderLogo());
+	if (menuButton.show && menuButton.position === "left")
+		leftItems.push(renderMenuButton());
+	if (navItems.length > 0) leftItems.push(renderNavItems());
+
+	if (searchBar.show && searchBar.position === "center")
+		centerItems.push(renderSearchBar());
+
+	if (userSection.show && userSection.position === "right")
+		rightItems.push(renderUserSection());
+
+	return (
+		<nav
+			className={`bg-amber-25  px-4 py-3 min-w-full box-border ${className}`}
+		>
+			<div className="min-w-full mx-auto flex items-center justify-between">
+				<div className="flex items-center space-x-4">{leftItems}</div>
+				<div className="flex items-center flex-1 justify-center">
+					{centerItems}
+				</div>
+				<div className="flex items-center">{rightItems}</div>
+			</div>
+		</nav>
 	);
 };
