@@ -1,5 +1,5 @@
 "use client";
-import { PostCreationModal } from "@/app/ui/post/create";
+import { PostCreationModal } from "@/app/ui/posts/create";
 import { NavBar } from "@/app/ui/navigation";
 
 export default function NewPostPage() {

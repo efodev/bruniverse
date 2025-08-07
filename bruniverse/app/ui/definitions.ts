@@ -115,3 +115,38 @@ export interface EmailVerificationResult {
 	success: boolean;
 	message: string;
 }
+
+// Reactions
+export type ReactionType = "heart" | "share" | "star";
+
+export interface ReactionState {
+	isActive: boolean;
+	count: number;
+}
+
+export interface ReactionProps {
+	size?: number;
+	postId?: string;
+	commentId?: string;
+	userId: string;
+	onReact: (
+		reactionType: ReactionType,
+		postId?: string,
+		commentId?: string
+	) => Promise<{ count: number; isActive: boolean }>;
+	allowedReactions?: {
+		heart?: boolean;
+		share?: boolean;
+		star?: boolean;
+	};
+	initialStates?: Partial<Record<ReactionType, ReactionState>>;
+	className?: string;
+}
+
+// Category
+export interface Category {
+	id: string;
+	name: string;
+	description?: string;
+	color_hex?: string;
+}

@@ -193,3 +193,42 @@ session_token = NULL,
 expires_at = NULL
 RETURNING last_login
 `;
+
+// Reactions CTE
+export const toggleReactionQuery = `
+WITH toggle_reaction AS (
+    DELETE FROM reactions 
+    WHERE user_id = $1 
+    AND reaction_type = $2
+    AND (
+        (post_id = $3 AND $4 IS NULL) OR 
+        (comment_id = $4 AND $3 IS NULL)
+    )
+    RETURNING id, 'deleted' as action
+),
+insert_reaction AS (
+    INSERT INTO reactions (user_id, post_id, comment_id, reaction_type)
+    SELECT $1, $3, $4, $2
+    WHERE NOT EXISTS (SELECT 1 FROM toggle_reaction)
+    RETURNING id, 'inserted' as action
+),
+final_stats AS (
+    SELECT 
+        COUNT(*) as total_count,
+        COUNT(CASE WHEN user_id = $1 THEN 1 END) > 0 as is_active
+    FROM reactions 
+    WHERE reaction_type = $2
+    AND (
+        (post_id = $3 AND $4 IS NULL) OR 
+        (comment_id = $4 AND $3 IS NULL)
+    )
+)
+SELECT 
+    total_count as count,
+    is_active,
+    COALESCE(tr.action, ir.action, 'no_change') as action
+FROM final_stats fs
+LEFT JOIN toggle_reaction tr ON true
+LEFT JOIN insert_reaction ir ON true;
+`;
+

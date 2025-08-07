@@ -1,16 +1,58 @@
 "use client";
 
+import { inter } from "@/app/ui/fonts";
 import { PostNavigation } from "@/app/ui/navigation";
-import { LeftSidebar, Post, RightContentArea } from "@/app/ui/post/all";
-import { PostCreationModal } from "@/app/ui/post/create";
+import {
+	LeftSidebar,
+	LeftSideBarTopLevelItemsProps,
+	Post,
+	RightContentArea,
+} from "@/app/ui/posts/all";
+import { PostCreationModal } from "@/app/ui/posts/create";
 import { Plus } from "lucide-react";
-import { useState } from "react";
-
+import { useEffect, useState } from "react";
+import { Category } from "@/app/ui/definitions";
 // Main App Component
 const MainPostPage = () => {
-	const [activeCategory, setActiveCategory] = useState("all");
+	const [_, setActiveCategory] = useState<string>("all");
 	const [selectedPost, setSelectedPost] = useState<Post | null>(null);
 	const [createPost, setCreatePost] = useState<boolean>(false);
+	const [categories, setCategories] = useState<Category[]>([]);
+
+	useEffect(() => {
+		fetchCategories().then((res) => setCategories(res));
+		console.log(categories);
+	}, []);
+	/**
+	 * Helper method to handle created post
+	 * @param post
+	 */
+	const addPost = async (post: {}) => {
+		console.log("Post added.");
+		console.log(`${post}`);
+		try {
+			const res = await fetch("/api/post/add", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"x-user-data": sessionStorage.getItem("user") as string,
+				},
+				body: JSON.stringify(post),
+			});
+			console.log(res);
+			const result = await res.json();
+			if (result.success) {
+				return true;
+			}
+		} catch (error) {
+			console.log(error);
+			return {
+				success: false,
+				error: "INTERNAL_ERROR",
+				message: "Failed to create post.",
+			};
+		}
+	};
 
 	const navItems = [
 		{
@@ -27,27 +69,20 @@ const MainPostPage = () => {
 		},
 	];
 
-	const category = [
-		{ id: "all", name: "All" },
-		{ id: "category", name: "category" },
-		{ id: "yours", name: "Yours" },
-		{ id: "starred", name: "Starred" },
-		{ id: "on-campus", name: "On-campus Questions" },
-		{ id: "off-campus", name: "Off-campus Questions" },
-		{ id: "find-people", name: "Find people" },
-		{ id: "promotion", name: "Promotion" },
-		{ id: "life-trivia", name: "Life Trivia" },
-		{ id: "other", name: "Other" },
-	];
-
 	const posts = [
 		{
 			id: "170",
 			title: "Looking for Internship Advice",
 			author: "Melody Chen",
-			timestamp: "2 days ago",
+			created_at: "2 days ago",
 			category: "questions",
-			likes: 0,
+			reactions: {
+				heart: {
+					isActive: true,
+					count: 12,
+				},
+				star: { isActive: false, count: 3 },
+			},
 			content: `Hey everyone! 👋\nHope you're all doing great! I'm currently starting to think about internships and wanted to ask for some advice from folks who've been through the process. I'm especially interested in roles related to creative tech, product design, music + AI.\nFeel free to drop any advice here or DM me — I really appreciate it! 🙏\nThanks in advance!!`,
 			comments: [
 				{
@@ -57,8 +92,14 @@ const MainPostPage = () => {
 						"Hi! I'm here offering some advice. I would say talk to people from both the CS department and Music Department at Brown. Also, there's a lab doing Music generation here. This is the link https://musicgen.com. Check it out and hope it helps!",
 					category: "",
 					author: "Bruce Liang",
-					timestamp: "",
-					likes: 0,
+					created_at: "",
+					reactions: {
+						heart: {
+							isActive: true,
+							count: 5,
+						},
+						star: { isActive: false, count: 4 },
+					},
 					comments: [],
 				},
 			],
@@ -67,9 +108,15 @@ const MainPostPage = () => {
 			id: "169",
 			title: "Study Group for CS150",
 			author: "Alex Kim",
-			timestamp: "1 day ago",
+			created_at: "1 day ago",
 			category: "on-campus",
-			likes: 0,
+			reactions: {
+				heart: {
+					isActive: true,
+					count: 12,
+				},
+				star: { isActive: false, count: 3 },
+			},
 			content: `Looking for people to form a study group for CS150. We can meet twice a week to go over problem sets and prepare for exams together.`,
 			comments: [
 				{
@@ -78,8 +125,14 @@ const MainPostPage = () => {
 					content: "I'm interested! What days work best for you?",
 					category: "",
 					author: "Sarah Johnson",
-					timestamp: "",
-					likes: 0,
+					created_at: "",
+					reactions: {
+						heart: {
+							isActive: true,
+							count: 12,
+						},
+						star: { isActive: false, count: 3 },
+					},
 					comments: [],
 				},
 				{
@@ -89,8 +142,14 @@ const MainPostPage = () => {
 						"Count me in. I'm free Tuesday and Thursday evenings.",
 					category: "",
 					author: "Mike Davis",
-					timestamp: "",
-					likes: 0,
+					created_at: "",
+					reactions: {
+						heart: {
+							isActive: true,
+							count: 12,
+						},
+						star: { isActive: false, count: 3 },
+					},
 					comments: [],
 				},
 			],
@@ -99,9 +158,15 @@ const MainPostPage = () => {
 			id: "168",
 			title: "Best Coffee Shops Near Campus",
 			author: "Emma Wilson",
-			timestamp: "3 days ago",
+			created_at: "3 days ago",
 			category: "life-trivia",
-			likes: 0,
+			reactions: {
+				heart: {
+					isActive: true,
+					count: 12,
+				},
+				star: { isActive: false, count: 3 },
+			},
 			content: `New to the area and looking for good coffee shops to study at. Any recommendations for places with good wifi and a quiet atmosphere?`,
 			comments: [
 				{
@@ -111,10 +176,56 @@ const MainPostPage = () => {
 						"Blue State Coffee is great! They have excellent wifi and plenty of seating.",
 					category: "",
 					author: "David Brown",
-					timestamp: "",
-					likes: 0,
+					created_at: "",
+					reactions: {
+						heart: {
+							isActive: true,
+							count: 12,
+						},
+						star: { isActive: false, count: 3 },
+					},
 					comments: [],
 				},
+			],
+		},
+	];
+
+	const topLevelItems: LeftSideBarTopLevelItemsProps[] = [
+		{
+			id: "all",
+			name: "All",
+			hasDropdown: false,
+		},
+		{
+			id: "categories",
+			name: "Categories",
+			hasDropdown: true,
+			dropdownItems: [
+				{ id: "on-campus", name: "On-campus Questions" },
+				{ id: "off-campus", name: "Off-campus Questions" },
+				{ id: "find-people", name: "Find people" },
+				{ id: "promotion", name: "Promotion" },
+				{ id: "life-trivia", name: "Life Trivia" },
+				{ id: "other", name: "Other" },
+			],
+		},
+		{
+			id: "yours",
+			name: "Yours",
+			hasDropdown: true,
+			dropdownItems: [
+				{ id: "your-posts", name: "Posts" },
+				{ id: "your-comments", name: "Comments" },
+				{ id: "your-drafts", name: "Drafts" },
+			],
+		},
+		{
+			id: "starred",
+			name: "Starred",
+			hasDropdown: true,
+			dropdownItems: [
+				{ id: "starred-posts", name: "Posts" },
+				{ id: "starred-comments", name: "Comments" },
 			],
 		},
 	];
@@ -147,6 +258,7 @@ const MainPostPage = () => {
 						posts={posts}
 						selectedPost={selectedPost}
 						onPostSelect={setSelectedPost}
+						options={topLevelItems}
 					/>
 
 					<RightContentArea
@@ -166,8 +278,9 @@ const MainPostPage = () => {
 			{createPost && (
 				<div className="flex items-center justify-center">
 					<PostCreationModal
+						categories={categories}
 						onClose={() => setCreatePost(false)}
-						onPost={({}) => console.log("posted")}
+						onPost={addPost}
 						className={`z-100000 top-[13vh] `}
 					/>
 				</div>
@@ -177,3 +290,23 @@ const MainPostPage = () => {
 };
 
 export default MainPostPage;
+
+/**
+ * Helper method for fetching post categories
+ * @returns a list of category objects
+ */
+export async function fetchCategories(): Promise<Category[]> {
+	try {
+		const response = await fetch("/api/post/categories", {
+			headers: {
+				"Content-Type": "application/json",
+				"x-user-data": sessionStorage.getItem("user") as string,
+			},
+		});
+		const res = await response.json();
+		return res.success ? res.data : [];
+	} catch (error) {
+		console.log(error);
+		return [];
+	}
+}

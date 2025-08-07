@@ -8,9 +8,10 @@ import {
 	Plus,
 	ChevronDown,
 } from "lucide-react";
-import { NavItem } from "../definitions";
-import { PostNavigation } from "../navigation";
+import { ReactionState, ReactionType } from "../definitions";
 import { inter } from "../fonts";
+import { Reactions } from "../util/reactions";
+import { createReactionHandler } from "@/app/lib/reactions";
 
 // Category Filter Component
 interface CategoryFilterProps {
@@ -18,51 +19,30 @@ interface CategoryFilterProps {
 	activeCategory: string;
 	onCategoryChange: (category: string) => void;
 }
-const CategoryFilter = ({
-	categories,
-	activeCategory,
-	onCategoryChange,
-}: CategoryFilterProps) => {
-	return (
-		<div className="flex flex-wrap gap-2 mb-6">
-			{categories.map((category, index) => (
-				<button
-					key={index}
-					onClick={() => onCategoryChange(category)}
-					className={`px-4 py-2 rounded-full font-medium transition-colors ${
-						activeCategory === category
-							? "bg-amber-800 text-white"
-							: "bg-amber-100 text-amber-800 hover:bg-amber-200"
-					}`}
-				>
-					{category}
-				</button>
-			))}
-		</div>
-	);
-};
 
 // Left Sidebar Component with categories and posts list
-interface LeftSideBarTopLevelItemsProps {
+export interface LeftSideBarTopLevelItemsProps {
 	id: string;
 	name: string;
 	hasDropdown: boolean;
 	dropdownItems?: { id: string; name: string }[];
 }
 interface LeftSidebarProps {
-	onCategoryChange: (category: string) => void;
+	onCategoryChange?: (category:string) => void;
 	posts: Post[];
 	selectedPost: Post | null;
 	onPostSelect: (post: Post) => void;
+	options: LeftSideBarTopLevelItemsProps[];
 }
+
 export interface Post {
 	id: string;
 	title: string;
 	content: string;
 	category: string;
 	author: string;
-	timestamp: string;
-	likes: number;
+	created_at: string;
+	reactions: Partial<Record<ReactionType, ReactionState>>;
 	comments: Post[];
 }
 export const LeftSidebar = ({
@@ -70,62 +50,23 @@ export const LeftSidebar = ({
 	posts,
 	selectedPost,
 	onPostSelect,
+	options,
 }: LeftSidebarProps) => {
 	const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 	const [activeCategory, setActiveCategory] = useState<string>("all");
-
-	const topLevelItems: LeftSideBarTopLevelItemsProps[] = [
-		{
-			id: "all",
-			name: "All",
-			hasDropdown: false,
-		},
-		{
-			id: "categories",
-			name: "Categories",
-			hasDropdown: true,
-			dropdownItems: [
-				{ id: "on-campus", name: "On-campus Questions" },
-				{ id: "off-campus", name: "Off-campus Questions" },
-				{ id: "find-people", name: "Find people" },
-				{ id: "promotion", name: "Promotion" },
-				{ id: "life-trivia", name: "Life Trivia" },
-				{ id: "other", name: "Other" },
-			],
-		},
-		{
-			id: "yours",
-			name: "Yours",
-			hasDropdown: true,
-			dropdownItems: [
-				{ id: "your-posts", name: "Your Posts" },
-				{ id: "your-comments", name: "Your Comments" },
-				{ id: "your-drafts", name: "Your Drafts" },
-			],
-		},
-		{
-			id: "starred",
-			name: "Starred",
-			hasDropdown: true,
-			dropdownItems: [
-				{ id: "starred-posts", name: "Starred Posts" },
-				{ id: "starred-comments", name: "Starred Comments" },
-			],
-		},
-	];
 
 	const handleItemClick = (item: LeftSideBarTopLevelItemsProps) => {
 		setActiveCategory(item.id);
 		if (item.hasDropdown) {
 			setOpenDropdown(openDropdown === item.id ? null : item.id);
 		} else {
-			onCategoryChange(item.id);
+			onCategoryChange && onCategoryChange(item.id);
 			setOpenDropdown(null);
 		}
 	};
 
 	const handleDropdownItemClick = (itemId: string) => {
-		onCategoryChange(itemId);
+		onCategoryChange && onCategoryChange(itemId);
 		setOpenDropdown(null);
 	};
 
@@ -134,7 +75,7 @@ export const LeftSidebar = ({
 			{/* Categories Section */}
 			<div className="mb-6 w-full">
 				<div className="flex flex-wrap gap-3">
-					{topLevelItems.map((item) => (
+					{options.map((item) => (
 						<div
 							key={item.id}
 							className="relative"
@@ -221,8 +162,8 @@ export const RightContentArea = ({
 	selectedPost: Post | null;
 	style: string;
 }) => {
-	const [isLiked, setIsLiked] = useState(false);
-	const [isStarred, setIsStarred] = useState(false);
+	const userId = "";
+	const handleReaction = createReactionHandler(userId);
 
 	if (!selectedPost) {
 		return (
@@ -254,7 +195,7 @@ export const RightContentArea = ({
 					<div className="flex items-center space-x-3 mb-2">
 						<h3 className="font-semibold">{selectedPost.author}</h3>
 						<span className="text-sm ">
-							{selectedPost.timestamp}
+							{selectedPost.created_at}
 						</span>
 					</div>
 					<div className="inline-block bg-amber-100 px-3 py-1 rounded-full text-sm font-medium mb-3">
@@ -274,31 +215,16 @@ export const RightContentArea = ({
 							))}
 					</div>
 					<div className="flex items-center space-x-6 text-amber-700 mb-6">
-						<button
-							onClick={() => setIsLiked(!isLiked)}
-							className={`flex items-center space-x-2 hover:text-amber-900 transition-colors ${
-								isLiked ? "text-red-500" : ""
-							}`}
-						>
-							<Heart
-								size={18}
-								fill={isLiked ? "currentColor" : "none"}
-							/>
-						</button>
-						<button className="flex items-center space-x-2 hover:text-amber-900 transition-colors">
-							<Share size={18} />
-						</button>
-						<button
-							onClick={() => setIsStarred(!isStarred)}
-							className={`flex items-center space-x-2 hover:text-amber-900 transition-colors ${
-								isStarred ? "text-yellow-500" : ""
-							}`}
-						>
-							<Star
-								size={18}
-								fill={isStarred ? "currentColor" : "none"}
-							/>
-						</button>
+						<Reactions
+							postId={selectedPost.id}
+							userId={userId}
+							onReact={handleReaction}
+							initialStates={{
+								heart: { isActive: false, count: 5 },
+								share: { isActive: true, count: 2 },
+								star: { isActive: false, count: 8 },
+							}}
+						/>
 					</div>
 				</div>
 			</div>
@@ -322,12 +248,17 @@ export const RightContentArea = ({
 									{comment.author}
 								</span>
 								<div className="flex space-x-2">
-									<button className="text-amber-600 hover:text-amber-800">
-										<Heart size={14} />
-									</button>
-									<button className="text-amber-600 hover:text-amber-800">
-										<Share size={14} />
-									</button>
+									<Reactions
+										size={14}
+										commentId="comment-789"
+										userId={userId}
+										onReact={handleReaction}
+										allowedReactions={{
+											heart: true,
+											star: true,
+										}}
+										initialStates={comment.reactions}
+									/>
 								</div>
 							</div>
 							<p className="text-sm font-normal leading-relaxed">
@@ -341,102 +272,100 @@ export const RightContentArea = ({
 	);
 };
 
-// Post Component
-const Post = ({ post }: { post: Post }) => {
-	const [isLiked, setIsLiked] = useState(false);
-	const [isStarred, setIsStarred] = useState(false);
+// // Post Component
+// const Post = ({ post }: { post: Post }) => {
+// 	const [isLiked, setIsLiked] = useState(false);
+// 	const [isStarred, setIsStarred] = useState(false);
+// 	const userId = "";
 
-	return (
-		<div className="bg-white rounded-2xl p-6 mb-6 border border-amber-200 hover:shadow-md transition-shadow">
-			<div className="flex items-start space-x-4">
-				<div className="w-12 h-12 bg-amber-900 rounded-full flex items-center justify-center text-white font-semibold text-lg">
-					{post.author.charAt(0)}
-				</div>
-				<div className="flex-1">
-					<div className="flex items-center space-x-3 mb-2">
-						<h3 className="font-semibold text-amber-900">
-							{post.author}
-						</h3>
-						<span className="text-sm text-amber-600">
-							{post.timestamp}
-						</span>
-					</div>
-					<div className="inline-block bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm font-medium mb-3">
-						{post.category}
-					</div>
-					<h2 className="text-xl font-bold text-amber-900 mb-4 flex items-center">
-						{post.title}
-						<span className="ml-3 text-sm text-amber-600 font-normal">
-							#{post.id}
-						</span>
-					</h2>
-					<div className="text-amber-800 space-y-2 mb-4">
-						{post.content.split("\n").map((paragraph, index) => (
-							<p key={index}>{paragraph}</p>
-						))}
-					</div>
-					<div className="flex items-center space-x-6 text-amber-700">
-						<button
-							onClick={() => setIsLiked(!isLiked)}
-							className={`flex items-center space-x-2 hover:text-amber-900 transition-colors ${
-								isLiked ? "text-red-500" : ""
-							}`}
-						>
-							<Heart
-								size={18}
-								fill={isLiked ? "currentColor" : "none"}
-							/>
-						</button>
-						<button className="flex items-center space-x-2 hover:text-amber-900 transition-colors">
-							<Share size={18} />
-						</button>
-						<button
-							onClick={() => setIsStarred(!isStarred)}
-							className={`flex items-center space-x-2 hover:text-amber-900 transition-colors ${
-								isStarred ? "text-yellow-500" : ""
-							}`}
-						>
-							<Star
-								size={18}
-								fill={isStarred ? "currentColor" : "none"}
-							/>
-						</button>
-					</div>
-				</div>
-			</div>
+// 	const handleReaction = createReactionHandler(userId);
 
-			{/* Comments Section */}
-			<div className="mt-6 border-t border-amber-200 pt-4">
-				<h4 className="font-semibold text-amber-900 mb-4">Comments</h4>
-				{post.comments.map((comment: Post, index) => (
-					<div
-						key={index}
-						className="flex items-start space-x-3 mb-4"
-					>
-						<div className="w-8 h-8 bg-amber-700 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-							{comment.author.charAt(0)}
-						</div>
-						<div className="flex-1">
-							<div className="flex items-center space-x-2 mb-1">
-								<span className="font-medium text-amber-900">
-									{comment.author}
-								</span>
-								<div className="flex space-x-2">
-									<button className="text-amber-600 hover:text-amber-800">
-										<Heart size={14} />
-									</button>
-									<button className="text-amber-600 hover:text-amber-800">
-										<Share size={14} />
-									</button>
-								</div>
-							</div>
-							<p className="text-amber-800 text-sm leading-relaxed">
-								{comment.content}
-							</p>
-						</div>
-					</div>
-				))}
-			</div>
-		</div>
-	);
-};
+// 	return (
+// 		<div className="bg-white rounded-2xl p-6 mb-6 border border-amber-200 hover:shadow-md transition-shadow">
+// 			<div className="flex items-start space-x-4">
+// 				<div className="w-12 h-12 bg-amber-900 rounded-full flex items-center justify-center text-white font-semibold text-lg">
+// 					{post.author.charAt(0)}
+// 				</div>
+// 				<div className="flex-1">
+// 					<div className="flex items-center space-x-3 mb-2">
+// 						<h3 className="font-semibold text-amber-900">
+// 							{post.author}
+// 						</h3>
+// 						<span className="text-sm text-amber-600">
+// 							{post.created_at}
+// 						</span>
+// 					</div>
+// 					<div className="inline-block bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm font-medium mb-3">
+// 						{post.category}
+// 					</div>
+// 					<h2 className="text-xl font-bold text-amber-900 mb-4 flex items-center">
+// 						{post.title}
+// 						<span className="ml-3 text-sm text-amber-600 font-normal">
+// 							#{post.id}
+// 						</span>
+// 					</h2>
+// 					<div className="text-amber-800 space-y-2 mb-4">
+// 						{post.content.split("\n").map((paragraph, index) => (
+// 							<p key={index}>{paragraph}</p>
+// 						))}
+// 					</div>
+// 					<div className="flex items-center space-x-6 text-amber-700">
+// 						<div className="bg-white p-6 rounded-lg shadow-sm">
+// 							<h3 className="font-semibold mb-4 text-gray-700">
+// 								Post Reactions:
+// 							</h3>
+// 							<Reactions
+// 								postId={post.id}
+// 								userId={userId}
+// 								onReact={handleReaction}
+// 								initialStates={{
+// 									heart: { isActive: false, count: 5 },
+// 									share: { isActive: true, count: 2 },
+// 									star: { isActive: false, count: 8 },
+// 								}}
+// 							/>
+// 						</div>
+// 					</div>
+// 				</div>
+// 			</div>
+
+// 			{/* Comments Section */}
+// 			<div className="mt-6 border-t border-amber-200 pt-4">
+// 				<h4 className="font-semibold text-amber-900 mb-4">Comments</h4>
+// 				{post.comments.map((comment: Post, index) => (
+// 					<div
+// 						key={index}
+// 						className="flex items-start space-x-3 mb-4"
+// 					>
+// 						<div className="w-8 h-8 bg-amber-700 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+// 							{comment.author.charAt(0)}
+// 						</div>
+// 						<div className="flex-1">
+// 							<div className="flex items-center space-x-2 mb-1">
+// 								<span className="font-medium text-amber-900">
+// 									{comment.author}
+// 								</span>
+// 								<div className="flex space-x-2">
+// 									<Reactions
+// 										size={14}
+// 										commentId="comment-789"
+// 										userId={userId}
+// 										onReact={handleReaction}
+// 										allowedReactions={{
+// 											heart: true,
+// 											star: true,
+// 										}}
+// 										initialStates={comment.reactions}
+// 									/>
+// 								</div>
+// 							</div>
+// 							<p className="text-amber-800 text-sm leading-relaxed">
+// 								{comment.content}
+// 							</p>
+// 						</div>
+// 					</div>
+// 				))}
+// 			</div>
+// 		</div>
+// 	);
+// };

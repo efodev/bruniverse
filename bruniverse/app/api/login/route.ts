@@ -63,16 +63,6 @@ export async function POST(request: NextRequest) {
 				audience: `${data.id}`,
 			}
 		);
-		return NextResponse.json({
-			success: true,
-			message: "Login successful",
-			data: {
-				id: data.id,
-				email: data.email,
-				lastLogin: data.last_login,
-			},
-		});
-
 		return NextResponse.json(
 			{
 				success: true,
@@ -88,6 +78,7 @@ export async function POST(request: NextRequest) {
 				headers: {
 					"Set-Cookie": `token=${token}; HttpOnly; Secure; SameSite=Strict; Max-Age=${7 * 24 * 60 * 60}; Path=/`,
 					"Content-Type": "application/json",
+					"x-user-data": data.id,
 				},
 			}
 		);

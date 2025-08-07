@@ -109,7 +109,7 @@ CREATE TABLE posts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     category_id UUID REFERENCES categories(id),
-    title VARCHAR(255) NOT NULL,
+    title VARCHAR(50) NOT NULL,
     content TEXT NOT NULL,
     is_anonymous BOOLEAN DEFAULT false,
     anonymity_reason TEXT,
@@ -143,7 +143,7 @@ CREATE TABLE comments (
 );
 
 -- Likes/reactions table
-CREATE TABLE likes (
+CREATE TABLE reactions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     post_id UUID REFERENCES posts(id) ON DELETE CASCADE,

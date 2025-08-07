@@ -510,12 +510,12 @@ export const PostNavigation = ({
 		>
 			<div className={`${searchBar.style}`}>
 				<Search
-					className={`absolute left-3 top-1/3 transform -translate-y-1/2 w-[5%] h-[39%]`}
+					className={`absolute left-2 top-3 w-[5%] h-[39%]`}
 				/>
 				<input
 					type="text"
 					placeholder={searchBar.placeholder}
-					className="w-full pl-15 pr-4 py-2 bg-[#CC810033] border border-amber-200 rounded-full focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent text-#808080"
+					className="w-full pl-10 py-2 bg-[#CC810033] border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent text-#808080"
 				/>
 			</div>
 		</div>
