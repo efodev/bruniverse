@@ -28,7 +28,7 @@ export interface LeftSideBarTopLevelItemsProps {
 	dropdownItems?: { id: string; name: string }[];
 }
 interface LeftSidebarProps {
-	onCategoryChange?: (category:string) => void;
+	onCategoryChange?: (category: string) => void;
 	posts: Post[];
 	selectedPost: Post | null;
 	onPostSelect: (post: Post) => void;
@@ -39,7 +39,7 @@ export interface Post {
 	id: string;
 	title: string;
 	content: string;
-	category: string;
+	category?: string;
 	author: string;
 	created_at: string;
 	reactions: Partial<Record<ReactionType, ReactionState>>;

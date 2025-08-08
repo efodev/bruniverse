@@ -7,11 +7,11 @@
 
 ## Todo: Main Posting page
 
--   Create interface for comments that removes the category
 -   that should be absolutely postioned
 -   User can add tags below their questions
 -   center the leftside option buttons
--
+-   Try using context provider for general data that is shared accross components
+ Cache static UI compose like category options, etc and serve them via the server.
 
 ## Backend
 
@@ -19,4 +19,8 @@
 -   instead of store user-data via session storage, it better to keep the sessions token for that.
 -   Make good use of middleware just as in the edu-platform.
 
-- Cache static UI compose like category options, etc and serve them via the server.
+## Drafts & Formatting
+- Think of how to handle formatting
+
+## Posts
+- Find a clever way of handling pagination: should I display recent post firsts or last. Should I cache what the a specific user has seen already?

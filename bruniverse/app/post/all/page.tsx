@@ -29,8 +29,7 @@ const MainPostPage = () => {
 	 * @param post
 	 */
 	const addPost = async (post: {}) => {
-		console.log("Post added.");
-		console.log(`${post}`);
+		console.log("Post added");
 		try {
 			const res = await fetch("/api/post/add", {
 				method: "POST",
@@ -40,11 +39,8 @@ const MainPostPage = () => {
 				},
 				body: JSON.stringify(post),
 			});
-			console.log(res);
-			const result = await res.json();
-			if (result.success) {
-				return true;
-			}
+
+			return await res.json();
 		} catch (error) {
 			console.log(error);
 			return {
@@ -275,7 +271,7 @@ const MainPostPage = () => {
 						categories={categories}
 						onClose={() => setCreatePost(false)}
 						onPost={addPost}
-						className={`z-100000 top-[13vh] `}
+						className={`z-50 top-[13vh] `}
 					/>
 				</div>
 			)}

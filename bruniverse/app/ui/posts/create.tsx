@@ -3,142 +3,19 @@ import { FlexButton } from "../util/buttons";
 import { Bold, Italic, Link, List, Underline, X } from "lucide-react";
 import { validatePostInput } from "@/app/lib/post/util";
 import { Category } from "../definitions";
-
-// Drafts Sidebar Component
-interface Draft {
-	id: number;
-	title: string;
-	date: string;
-	content: string;
-	category: { id: string; name: string };
-}
-
-interface DraftSidebarProps {
-	drafts: Draft[];
-	onDraftClick: (draft: Draft) => void;
-	style?: {};
-	className?: string;
-}
-const DraftsSidebar = ({
-	drafts,
-	onDraftClick,
-	style,
-	className,
-}: DraftSidebarProps) => {
-	return (
-		<div className={`p-4${className}`}>
-			<h3 className="text-xl font-bold text-gray-800">Your Drafts</h3>
-			<div className="flex items-center justify-between mb-4">
-				{/* <button className="text-amber-600 hover:text-amber-800">
-					<X className="w-4 h-4" />
-				</button> */}
-			</div>
-
-			<div className="space-y-2">
-				{drafts.map((draft) => (
-					<div
-						key={draft.id}
-						className="p-3 bg-[#D9D9D942] rounded-lg border border-gray-200 hover:bg-stone-200 transition-colors cursor-pointer space-y-1"
-					>
-						<h3 className="font-semibold text-gray-800 truncate">
-							{draft.title}
-						</h3>
-						<p className="text-sm text-gray-600">{draft.date}</p>
-						<div className="flex flex-wrap gap-1">
-							<span
-								key={draft.category.id}
-								className="px-2 py-1 bg-gray-100  text-xs rounded-full"
-							>
-								{draft.category.name}
-							</span>
-						</div>
-					</div>
-				))}
-			</div>
-		</div>
-	);
-};
-
-// Rich Text Editor Component
-
-const RichTextEditor = ({
-	content,
-	onChange,
-}: {
-	content: string;
-	onChange: (content: string) => void;
-}) => {
-	const [activeFormats, setActiveFormats] = useState(new Set());
-
-	const toggleFormat = (format: string) => {
-		const newFormats = new Set(activeFormats);
-		if (newFormats.has(format)) {
-			newFormats.delete(format);
-		} else {
-			newFormats.add(format);
-		}
-		setActiveFormats(newFormats);
-	};
-
-	return (
-		<div className="border border-gray-300 rounded-lg bg-[#D9D9D942] h-1/2 box-border">
-			<div className="flex items-center space-x-2 p-2 h-[2vw]">
-				<button
-					onClick={() => toggleFormat("bold")}
-					className={`p-1 rounded ${activeFormats.has("bold") ? "text-amber-700" : "hover:border"}`}
-				>
-					<Bold className="w-4 h-4" />
-				</button>
-				<button
-					onClick={() => toggleFormat("italic")}
-					className={`p-1 rounded ${activeFormats.has("italic") ? "text-amber-700" : "hover:border"}`}
-				>
-					<Italic className="w-4 h-4" />
-				</button>
-				<button
-					onClick={() => toggleFormat("underline")}
-					className={`p-1 rounded ${activeFormats.has("underline") ? "text-amber-700" : "hover:border"}`}
-				>
-					<Underline className="w-4 h-4" />
-				</button>
-				<button
-					onClick={() => toggleFormat("list")}
-					className={`p-1 rounded ${activeFormats.has("list") ? "text-amber-700" : "hover:border"}`}
-				>
-					<List className="w-4 h-4" />
-				</button>
-				<button
-					onClick={() => toggleFormat("link")}
-					className={`p-1 rounded ${activeFormats.has("link") ? "text-amber-700" : "hover:border"}`}
-				>
-					<Link className="w-4 h-4" />
-				</button>
-			</div>
-			<textarea
-				value={content}
-				onChange={(e) => onChange(e.target.value)}
-				className="w-full h-[35vh] px-6 py-3 resize-none focus:outline-none overflow"
-				placeholder="I'm not sure if there should a length limitation here"
-			/>
-			<div className="flex justify-end m-2">
-				<FlexButton
-					action={() => console.log("Preview")}
-					color="bruniverse"
-					className="px-3 py-2 text-amber-700 rounded font-medium text-base"
-				>
-					<strong>Preview</strong>
-				</FlexButton>
-			</div>
-		</div>
-	);
-};
+import { ToastMessage } from "../util/toast";
 
 // Post Creation Modal Component
 interface PostModalProps {
 	onClose: () => void;
-	onPost: (post: {}) => any;
+	onPost: (post: {}) => Promise<any>;
 	categories?: Category[];
 	className?: string;
+}
+// Post status interface
+interface PostStatus {
+	success: boolean;
+	message: string;
 }
 export const PostCreationModal = ({
 	onClose,
@@ -153,19 +30,13 @@ export const PostCreationModal = ({
 	}>({ id: "", name: "" });
 	const [content, setContent] = useState("");
 	const [isAnonymous, setIsAnonymous] = useState(false);
-	const [error, setError] = useState("");
+	const [addPostStatus, setAddPostStatus] = useState<PostStatus | null>();
 	const [drafts, setDrafts] = useState<Draft[]>([]);
 
+	// Get drafts from database
+	// Subsequent User draft should just be append to current drafts
+	// Scroll should be handled with pagination
 	useEffect(() => {}, [drafts]);
-
-	categories = categories || [
-		{ id: "oncampus", name: "On-campus Question" },
-		{ id: "offcampus", name: "Off-campus Question" },
-		{ id: "people", name: "Find People" },
-		{ id: "promotion", name: "Promotion" },
-		{ id: "life-trivial", name: "Life Trivia" },
-		{ id: "other", name: "Other" },
-	];
 
 	if (drafts.length == 0) {
 		const mydrafts = [
@@ -197,8 +68,10 @@ export const PostCreationModal = ({
 
 		setDrafts(mydrafts);
 	}
-
-	const handlePost = () => {
+	/**
+	 *  Helper method to handle creation of new post.
+	 */
+	const handlePost = async () => {
 		const post = {
 			title,
 			categoryId: selectedCategory.id,
@@ -208,13 +81,13 @@ export const PostCreationModal = ({
 		const { isValid, errors } = validatePostInput(post);
 		if (!isValid) {
 			console.log(errors);
-			setError(errors[0]);
+			setAddPostStatus({ success: false, message: errors[0] });
 		}
-		const result = onPost(post);
+		const result = await onPost(post);
 		if (result.success) {
-			onClose();
+			setAddPostStatus({ success: true, message: "Posted!" });
 		} else {
-			setError(result.error);
+			setAddPostStatus({ success: false, message: result.message });
 		}
 	};
 
@@ -234,6 +107,12 @@ export const PostCreationModal = ({
 			className={`absolute flex item-center justify-center bg-[#FEF4DC] rounded-[2.8vw] w-[90%] h-[86%]
 				border-2 box-border z-50 ${className}`}
 		>
+			{addPostStatus && (
+				<ToastMessage
+					status={addPostStatus}
+					onClose={() => setAddPostStatus(null)}
+				/>
+			)}
 			<div className="flex">
 				{/* Close button */}
 				<div className="absolute right-5 top-3 mb-4">
@@ -363,21 +242,127 @@ export const PostCreationModal = ({
 	);
 };
 
-// // Success Message Component
-// const SuccessMessage = ({ isVisible, onClose }) => {
-// 	if (!isVisible) return null;
+// Drafts Sidebar Component
+interface Draft {
+	id: number;
+	title: string;
+	date: string;
+	content: string;
+	category: { id: string; name: string };
+}
 
-// 	return (
-// 		<div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
-// 			<div className="flex items-center space-x-2">
-// 				<span>Successful Posted</span>
-// 				<button
-// 					onClick={onClose}
-// 					className="text-white hover:text-gray-200"
-// 				>
-// 					<X className="w-4 h-4" />
-// 				</button>
-// 			</div>
-// 		</div>
-// 	);
-// };
+interface DraftSidebarProps {
+	drafts: Draft[];
+	onDraftClick: (draft: Draft) => void;
+	style?: {};
+	className?: string;
+}
+const DraftsSidebar = ({
+	drafts,
+	onDraftClick,
+	style,
+	className,
+}: DraftSidebarProps) => {
+	return (
+		<div className={`p-4${className}`}>
+			<h3 className="text-xl font-bold text-gray-800 mb-4">
+				Your Drafts
+			</h3>
+			<div className="space-y-2">
+				{drafts.map((draft) => (
+					<div
+						key={draft.id}
+						className="p-3 bg-[#D9D9D942] rounded-lg border border-gray-200 hover:bg-stone-200 transition-colors cursor-pointer space-y-1"
+					>
+						<h3 className="font-semibold text-gray-800 truncate">
+							{draft.title}
+						</h3>
+						<p className="text-sm text-gray-600">{draft.date}</p>
+						<div className="flex flex-wrap gap-1">
+							<span
+								key={draft.category.id}
+								className="px-2 py-1 bg-gray-100  text-xs rounded-full"
+							>
+								{draft.category.name}
+							</span>
+						</div>
+					</div>
+				))}
+			</div>
+		</div>
+	);
+};
+
+// Rich Text Editor Component
+
+const RichTextEditor = ({
+	content,
+	onChange,
+}: {
+	content: string;
+	onChange: (content: string) => void;
+}) => {
+	const [activeFormats, setActiveFormats] = useState(new Set());
+
+	const toggleFormat = (format: string) => {
+		const newFormats = new Set(activeFormats);
+		if (newFormats.has(format)) {
+			newFormats.delete(format);
+		} else {
+			newFormats.add(format);
+		}
+		setActiveFormats(newFormats);
+	};
+
+	return (
+		<div className="border border-gray-300 rounded-lg bg-[#D9D9D942] h-1/2 box-border">
+			<div className="flex items-center space-x-2 p-2 h-[2vw]">
+				<button
+					onClick={() => toggleFormat("bold")}
+					className={`p-1 rounded ${activeFormats.has("bold") ? "text-amber-700" : "hover:border"}`}
+				>
+					<Bold className="w-4 h-4" />
+				</button>
+				<button
+					onClick={() => toggleFormat("italic")}
+					className={`p-1 rounded ${activeFormats.has("italic") ? "text-amber-700" : "hover:border"}`}
+				>
+					<Italic className="w-4 h-4" />
+				</button>
+				<button
+					onClick={() => toggleFormat("underline")}
+					className={`p-1 rounded ${activeFormats.has("underline") ? "text-amber-700" : "hover:border"}`}
+				>
+					<Underline className="w-4 h-4" />
+				</button>
+				<button
+					onClick={() => toggleFormat("list")}
+					className={`p-1 rounded ${activeFormats.has("list") ? "text-amber-700" : "hover:border"}`}
+				>
+					<List className="w-4 h-4" />
+				</button>
+				<button
+					onClick={() => toggleFormat("link")}
+					className={`p-1 rounded ${activeFormats.has("link") ? "text-amber-700" : "hover:border"}`}
+				>
+					<Link className="w-4 h-4" />
+				</button>
+			</div>
+			<textarea
+				value={content}
+				onChange={(e) => onChange(e.target.value)}
+				className="w-full h-[35vh] px-6 py-3 resize-none focus:outline-none overflow"
+				placeholder="I'm not sure if there should a length limitation here"
+			/>
+			<div className="flex justify-end m-2">
+				<FlexButton
+					action={() => console.log("Preview")}
+					color="bruniverse"
+					className="px-3 py-2 text-amber-700 rounded font-medium text-base"
+				>
+					<strong>Preview</strong>
+				</FlexButton>
+			</div>
+		</div>
+	);
+};

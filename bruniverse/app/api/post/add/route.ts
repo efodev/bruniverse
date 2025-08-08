@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
 		const userData = parseUserData(userDataHeader);
 
 		if (!userData || !userData.id) {
-			console.log("User authentication required ", userData?.id);
+			console.log("User authentication required ");
 			return NextResponse.json(
 				{
 					success: false,
@@ -134,7 +134,13 @@ export async function POST(request: NextRequest) {
 				{ status: 400 }
 			);
 		}
-
+		console.log("body ", [
+			userData.id,
+			body.categoryId,
+			body.title.trim(),
+			body.content.trim(),
+			body.is_anonymous,
+		]);
 		// Insert post into database
 		const result = await db.query(createPostQuery, [
 			userData.id,
@@ -145,7 +151,7 @@ export async function POST(request: NextRequest) {
 		]);
 
 		const newPost = result?.rows[0];
-		if (newPost || newPost.length === 0) {
+		if (newPost?.length === 0) {
 			console.log("Failed to create post.");
 			return NextResponse.json(
 				{
