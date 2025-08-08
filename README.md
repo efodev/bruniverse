@@ -18,3 +18,5 @@
 -   Move the backend to express and use the db format I created for edu-platform.
 -   instead of store user-data via session storage, it better to keep the sessions token for that.
 -   Make good use of middleware just as in the edu-platform.
+
+- Cache static UI compose like category options, etc and serve them via the server.

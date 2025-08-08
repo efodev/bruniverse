@@ -6,8 +6,8 @@ interface Category {
 	name: string;
 	description: string;
 	color_hex: string;
-	is_active: boolean;
-	created_at: string;
+	is_active?: boolean;
+	created_at?: string;
 }
 
 const getCategoriesQuery = `
@@ -27,7 +27,8 @@ const getCategoriesQuery = `
 export async function GET() {
 	try {
 		const result = await db.query(getCategoriesQuery);
-		const data = result.rows[0];
+		const data = result.rows;
+		console.log(result);
 		if (!data) {
 			return NextResponse.json(
 				{

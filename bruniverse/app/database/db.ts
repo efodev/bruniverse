@@ -35,12 +35,15 @@ class Database {
 			this.pool = new Pool({
 				host: process.env.DB_HOST || "localhost",
 				port: parseInt(process.env.DB_PORT || "5432"),
-				database: process.env.DB_NAME || "bruniversdb",
-				user: process.env.DB_USER || "bruniverse",
-				password: process.env.DB_PASSWORD || "",
+				database: process.env.DB_NAME || "neondb",
+				user: process.env.DB_USER || "neon",
+				password: process.env.DB_PASSWORD || "npg",
 				max: 20, // max connections in pool
 				idleTimeoutMillis: 30000,
 				connectionTimeoutMillis: 2000,
+				ssl: {
+					rejectUnauthorized: process.env.NODE_ENV === "development",
+				},
 			});
 
 			// Set up pool event handlers

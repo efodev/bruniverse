@@ -20,8 +20,9 @@ const MainPostPage = () => {
 	const [categories, setCategories] = useState<Category[]>([]);
 
 	useEffect(() => {
-		fetchCategories().then((res) => setCategories(res));
-		console.log(categories);
+		fetchCategories().then((res) => {
+			setCategories(res);
+		});
 	}, []);
 	/**
 	 * Helper method to handle created post
@@ -200,14 +201,7 @@ const MainPostPage = () => {
 			id: "categories",
 			name: "Categories",
 			hasDropdown: true,
-			dropdownItems: [
-				{ id: "on-campus", name: "On-campus Questions" },
-				{ id: "off-campus", name: "Off-campus Questions" },
-				{ id: "find-people", name: "Find people" },
-				{ id: "promotion", name: "Promotion" },
-				{ id: "life-trivia", name: "Life Trivia" },
-				{ id: "other", name: "Other" },
-			],
+			dropdownItems: categories,
 		},
 		{
 			id: "yours",
