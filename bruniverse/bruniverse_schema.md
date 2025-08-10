@@ -128,6 +128,45 @@ CREATE TABLE posts (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- drafts
+-- Drafts table for storing draft posts
+CREATE TABLE drafts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
+    title VARCHAR(50),
+    content TEXT,
+    is_anonymous BOOLEAN DEFAULT false,
+    status VARCHAR(20) DEFAULT 'active', -- active, posted, deleted, abandoned
+
+    -- Metadata fields
+    post_id UUID REFERENCES posts(id) ON DELETE SET NULL, -- Link to published post if drafted was posted
+    auto_save_count INTEGER DEFAULT 0, -- Track how many times auto-saved
+    expires_at TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL '30 days'), -- Auto cleanup after 30 days
+
+    -- Timestamps
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_accessed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP,
+
+    -- Constraints (defined inline or separately)
+    CONSTRAINT drafts_title_length CHECK (title IS NULL OR LENGTH(TRIM(title)) > 0),
+    CONSTRAINT drafts_content_length CHECK (content IS NULL OR LENGTH(TRIM(content)) > 0),
+    CONSTRAINT drafts_status_check CHECK (status IN ('active', 'posted', 'deleted', 'abandoned'))
+);
+
+-- Indexes for performance (defined as separate statements)
+CREATE INDEX idx_drafts_user_id ON drafts (user_id);
+CREATE INDEX idx_drafts_status ON drafts (status);
+CREATE INDEX idx_drafts_expires_at ON drafts (expires_at);
+CREATE INDEX idx_drafts_user_status ON drafts (user_id, status);
+
+-- Then create indexes separately
+CREATE INDEX idx_drafts_user_id ON drafts (user_id);
+CREATE INDEX idx_drafts_status ON drafts (status);
+CREATE INDEX idx_drafts_expires_at ON drafts (expires_at);
+CREATE INDEX idx_drafts_user_status ON drafts (user_id, status);
 -- Comments/replies table
 CREATE TABLE comments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

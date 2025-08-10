@@ -21,13 +21,16 @@ export const ToastMessage = ({
 			handleClose();
 		}, autoCloseDelay);
 
-		// Progress bar animation
+		// Progress bar animation - updates every 50ms for smoother animation
+		const updateInterval = 50;
+		const progressStep = 100 / (autoCloseDelay / updateInterval);
+
 		const progressInterval = setInterval(() => {
 			setProgress((prev) => {
-				const newProgress = prev - 100 / (autoCloseDelay / 100);
+				const newProgress = prev - progressStep;
 				return newProgress <= 0 ? 0 : newProgress;
 			});
-		}, 100);
+		}, updateInterval);
 
 		// Cleanup timers on unmount
 		return () => {
@@ -48,20 +51,19 @@ export const ToastMessage = ({
 
 	return (
 		<div
-			className={`fixed top-4 right-4 text-white px-3 py-4 rounded-lg shadow-lg z-55 transition-all duration-300 transform ${
+			className={`fixed top-4 right-4 text-white px-2 py-3 rounded-lg shadow-lg z-51 transition-all duration-300 transform ${
 				isVisible
 					? "translate-x-0 opacity-100"
 					: "translate-x-full opacity-0"
-			} ${status.success ? "bg-green-500" : "bg-red-500"} min-w-80 max-w-96`}
+			} ${status.success ? "bg-green-500" : "bg-red-500"} min-w-80`}
 		>
 			{/* Progress bar */}
-			<div className="absolute bottom-0 left-0 h-1 bg-white bg-opacity-30 rounded-b-lg overflow-hidden">
+			<div className="absolute bottom-0 left-0 h-1 bg-inherit bg-opacity-30 rounded-b-lg overflow-hidden w-full">
 				<div
-					className="h-full bg-white transition-all duration-100 ease-linear"
+					className={`h-full ${status.success ? "bg-green- 600" : "bg-red-600"} transition-all duration-100 ease-linear`}
 					style={{ width: `${progress}%` }}
 				/>
 			</div>
-
 			<div className="flex items-start space-x-3">
 				{/* Icon */}
 				<div className="flex-shrink-0 mt-0.5">
@@ -74,14 +76,14 @@ export const ToastMessage = ({
 
 				{/* Message */}
 				<div className="flex-1 pr-2">
-					<div className="font-medium text-sm">
+					<span className="font-semibold text-sm">
 						{status.success ? "Success! " : "Error: "}
-					</div>
-					<div className="text-sm opacity-90 mt-1">
+					</span>
+					<span className="text-sm font-medium opacity-90 mt-1">
 						{status.success
 							? "Successfully Posted"
 							: status.message}
-					</div>
+					</span>
 				</div>
 
 				{/* Close button */}

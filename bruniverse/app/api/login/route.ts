@@ -53,13 +53,13 @@ export async function POST(request: NextRequest) {
 		// Create JWT token.
 		const token = jwt.sign(
 			{
-				userId: data.id,
+				id: data.id,
 				email: data.brown_email,
 			},
 			process.env.JWT_SECRET!,
 			{
 				expiresIn: "7d",
-				issuer: "bruviverse",
+				issuer: "bruniverse",
 				audience: `${data.id}`,
 			}
 		);
@@ -78,7 +78,6 @@ export async function POST(request: NextRequest) {
 				headers: {
 					"Set-Cookie": `token=${token}; HttpOnly; Secure; SameSite=Strict; Max-Age=${7 * 24 * 60 * 60}; Path=/`,
 					"Content-Type": "application/json",
-					"x-user-data": data.id,
 				},
 			}
 		);

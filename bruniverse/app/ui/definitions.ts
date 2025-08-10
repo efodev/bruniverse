@@ -150,3 +150,19 @@ export interface Category {
 	description?: string;
 	color_hex?: string;
 }
+
+export // Drafts Sidebar Component
+interface Draft {
+	id?: string;
+	user_id?: number;
+	title: string;
+	content: string;
+	category: Category;
+	date: string;
+	is_anonymous: boolean;
+	status?: string;
+	auto_save_count?: number;
+	created_at?: string;
+	updated?: string;
+	last_accessed_at?: string;
+}

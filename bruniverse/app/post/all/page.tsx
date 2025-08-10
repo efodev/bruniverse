@@ -1,6 +1,5 @@
 "use client";
 
-import { inter } from "@/app/ui/fonts";
 import { PostNavigation } from "@/app/ui/navigation";
 import {
 	LeftSidebar,
@@ -222,7 +221,7 @@ const MainPostPage = () => {
 
 	return (
 		<div
-			className={`fixed min-h-dvh min-w-dvw ${createPost ? "bg-[#ADA89B]" : "bg-amber-25 "}`}
+			className={`fixed min-h-dvh min-w-dvw ${createPost ? "bg-[#ADA89B]" : "bg-amber-25"}`}
 		>
 			<PostNavigation
 				logo={{ show: true, position: "left", src: "" }}
@@ -266,14 +265,12 @@ const MainPostPage = () => {
 			</button>
 
 			{createPost && (
-				<div className="flex items-center justify-center">
-					<PostCreationModal
-						categories={categories}
-						onClose={() => setCreatePost(false)}
-						onPost={addPost}
-						className={`z-50 top-[13vh] `}
-					/>
-				</div>
+				<PostCreationModal
+					categories={categories}
+					onClose={() => setCreatePost(false)}
+					onPost={addPost}
+					className={`z-50 top-[13vh]`}
+				/>
 			)}
 		</div>
 	);
