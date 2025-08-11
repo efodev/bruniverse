@@ -11,13 +11,14 @@ export function validatePostInput(body: any): {
 	if (!body.title) {
 		errors.push("Title");
 	}
-	if (!body.category) {
+	if (!body.categoryId) {
 		errors.push("Category");
 	} else if (!body.content) {
 		errors.push("Content");
 	}
 
-	const error = errors.join(", ") + "are required.";
+	const error =
+		errors.join(", ") + (errors.length <= 0 ? "is" : "are") + "required";
 	return {
 		isValid: errors.length === 0,
 		error,
@@ -475,6 +476,66 @@ export const useDraftPagination = (pageSize: number = 10) => {
 		removeDraft,
 		searchDrafts: searchDraftsLocal,
 	};
+};
+
+// POST UTILS
+// Update your existing fetchPosts function
+export const fetchPosts = async (
+	page: number,
+	category: string,
+	search: string
+) => {
+	const params = new URLSearchParams({
+		page: page.toString(),
+		limit: "10",
+		...(category !== "all" && { category }),
+		...(search && { search }),
+	});
+
+	const response = await fetch(`/api/posts?${params}`, {
+		headers: {
+			"Content-Type": "application/json",
+			"x-user-data": sessionStorage.getItem("user") as string,
+			credentials: "include",
+		},
+	});
+
+	return await response.json();
+};
+
+/**
+ * Helper method to handle created post
+ * @param post
+ */
+export const createPost = async (post: {}) => {
+	const { isValid, error } = validatePostInput(post);
+	if (!isValid) {
+		return {
+			success: false,
+			error: "VALIDATION_ERROR",
+			message: "Failed to create post.",
+		};
+	}
+	try {
+		const res = await fetch("/api/posts", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"x-user-data": sessionStorage.getItem("user") as string,
+				credentials: "include",
+			},
+			body: JSON.stringify(post),
+		});
+
+		return await res.json();
+	} catch (error) {
+		console.log(error);
+		return {
+			success: false,
+			error: "INTERNAL_ERROR",
+			message: "Failed to create post.",
+		};
+	}
 };
 
 // /**

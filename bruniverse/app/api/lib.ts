@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+
 // Interfaces
 interface UserData {
 	id: string;
@@ -71,4 +72,11 @@ export function parseUserToken(token: string | null): UserData | null {
 		console.log(error);
 		return null;
 	}
+}
+
+export interface CreatePostRequest {
+	title: string;
+	content: string;
+	categoryId: number;
+	isAnonymous: boolean;
 }

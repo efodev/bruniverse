@@ -16,6 +16,7 @@ import {
 	validatePostInput,
 	saveDraft,
 	useDraftPagination,
+	createPost,
 } from "@/app/lib/post/util";
 import { Category, Draft } from "../definitions";
 import { ToastMessage } from "../util/toast";
@@ -23,7 +24,6 @@ import { ToastMessage } from "../util/toast";
 // Post Creation Modal Component
 interface PostModalProps {
 	onClose: () => void;
-	onPost: (post: {}) => Promise<any>;
 	categories?: Category[];
 	className?: string;
 }
@@ -41,7 +41,6 @@ interface DraftContext {
 
 export const PostCreationModal = ({
 	onClose,
-	onPost,
 	categories = [],
 	className = "",
 }: PostModalProps) => {
@@ -72,15 +71,9 @@ export const PostCreationModal = ({
 			content,
 			isAnonymous,
 		};
-		const { isValid, error } = validatePostInput(post);
-		if (!isValid) {
-			console.log(error);
-			setAddPostStatus({ success: false, message: error });
-			return;
-		}
 
 		const context = draftContextRef.current;
-		const result = await onPost(post);
+		const result = await createPost(post);
 
 		if (result.success) {
 			setAddPostStatus({ success: true, message: "Posted!" });

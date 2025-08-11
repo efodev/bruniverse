@@ -166,3 +166,15 @@ interface Draft {
 	updated?: string;
 	last_accessed_at?: string;
 }
+
+export interface Post {
+	id: string;
+	title: string;
+	content: string;
+	category?: string;
+	author: string;
+	createdAt: string;
+	threadNumber?: number;
+	reactions: Partial<Record<ReactionType, ReactionState>>;
+	comments: Post[];
+}

@@ -2,14 +2,11 @@
 // app/api/drafts/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import db, { DatabaseError } from "@/app/database/db";
-import { parseUserToken, validateApiPostInput } from "../lib";
-
-interface CreateDraftRequest {
-	title: string;
-	content: string;
-	categoryId: number;
-	isAnonymous: boolean;
-}
+import {
+	parseUserToken,
+	validateApiPostInput,
+	CreatePostRequest,
+} from "../lib";
 
 interface UpdateDraftRequest {
 	id: number;
@@ -208,7 +205,7 @@ export async function POST(request: NextRequest) {
 		}
 
 		// Parse request body
-		const body: CreateDraftRequest = await request.json();
+		const body: CreatePostRequest = await request.json();
 		const { title, content, categoryId, isAnonymous } = body;
 
 		// Validate required fields
@@ -506,7 +503,7 @@ export async function DELETE(request: NextRequest) {
 // import db, { DatabaseError } from "@/app/database/db";
 // import { parseUserToken, validateApiPostInput } from "../lib";
 
-// interface CreateDraftRequest {
+// interface CreatePostRequest {
 // 	title: string;
 // 	content: string;
 // 	categoryId: number;
@@ -600,7 +597,7 @@ export async function DELETE(request: NextRequest) {
 // 		}
 
 // 		// Parse request body
-// 		const body: CreateDraftRequest = await request.json();
+// 		const body: CreatePostRequest = await request.json();
 // 		console.log("body ", body);
 // 		const { title, content, categoryId, isAnonymous } = body;
 // 		// Validate required fields

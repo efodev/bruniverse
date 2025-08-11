@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 import rateLimit from "next-rate-limit";
-import { NextApiResponse } from "next";
 import { NextRequest, NextResponse } from "next/server";
 import { handleAuthOperation } from "@/app/lib/auth/services";
 

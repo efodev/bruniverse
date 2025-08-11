@@ -4,13 +4,13 @@ import { PostNavigation } from "@/app/ui/navigation";
 import {
 	LeftSidebar,
 	LeftSideBarTopLevelItemsProps,
-	Post,
 	RightContentArea,
 } from "@/app/ui/posts/all";
 import { PostCreationModal } from "@/app/ui/posts/create";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Category } from "@/app/ui/definitions";
+import { Category, Post } from "@/app/ui/definitions";
+
 // Main App Component
 const MainPostPage = () => {
 	const [_, setActiveCategory] = useState<string>("all");
@@ -70,7 +70,7 @@ const MainPostPage = () => {
 			id: "170",
 			title: "Looking for Internship Advice",
 			author: "Melody Chen",
-			created_at: "2 days ago",
+			createdAt: "2 days ago",
 			category: "questions",
 			reactions: {
 				heart: {
@@ -88,7 +88,7 @@ const MainPostPage = () => {
 						"Hi! I'm here offering some advice. I would say talk to people from both the CS department and Music Department at Brown. Also, there's a lab doing Music generation here. This is the link https://musicgen.com. Check it out and hope it helps!",
 					category: "",
 					author: "Bruce Liang",
-					created_at: "",
+					createdAt: "",
 					reactions: {
 						heart: {
 							isActive: true,
@@ -104,7 +104,7 @@ const MainPostPage = () => {
 			id: "169",
 			title: "Study Group for CS150",
 			author: "Alex Kim",
-			created_at: "1 day ago",
+			createdAt: "1 day ago",
 			category: "on-campus",
 			reactions: {
 				heart: {
@@ -121,7 +121,7 @@ const MainPostPage = () => {
 					content: "I'm interested! What days work best for you?",
 					category: "",
 					author: "Sarah Johnson",
-					created_at: "",
+					createdAt: "",
 					reactions: {
 						heart: {
 							isActive: true,
@@ -138,7 +138,7 @@ const MainPostPage = () => {
 						"Count me in. I'm free Tuesday and Thursday evenings.",
 					category: "",
 					author: "Mike Davis",
-					created_at: "",
+					createdAt: "",
 					reactions: {
 						heart: {
 							isActive: true,
@@ -154,7 +154,7 @@ const MainPostPage = () => {
 			id: "168",
 			title: "Best Coffee Shops Near Campus",
 			author: "Emma Wilson",
-			created_at: "3 days ago",
+			createdAt: "3 days ago",
 			category: "life-trivia",
 			reactions: {
 				heart: {
@@ -172,7 +172,7 @@ const MainPostPage = () => {
 						"Blue State Coffee is great! They have excellent wifi and plenty of seating.",
 					category: "",
 					author: "David Brown",
-					created_at: "",
+					createdAt: "",
 					reactions: {
 						heart: {
 							isActive: true,
@@ -221,7 +221,7 @@ const MainPostPage = () => {
 
 	return (
 		<div
-			className={`fixed min-h-dvh min-w-dvw ${createPost ? "bg-[#ADA89B]" : "bg-amber-25"}`}
+			className={`fixed min-h-dvh min-w-dvw ${createPost ? "bg-[#ADA89B]" : "bg-[#FEF4DC]"}`}
 		>
 			<PostNavigation
 				logo={{ show: true, position: "left", src: "" }}
@@ -268,7 +268,6 @@ const MainPostPage = () => {
 				<PostCreationModal
 					categories={categories}
 					onClose={() => setCreatePost(false)}
-					onPost={addPost}
 					className={`z-50 top-[13vh]`}
 				/>
 			)}
@@ -284,7 +283,7 @@ export default MainPostPage;
  */
 export async function fetchCategories(): Promise<Category[]> {
 	try {
-		const response = await fetch("/api/post/categories", {
+		const response = await fetch("/api/posts/categories", {
 			headers: {
 				"Content-Type": "application/json",
 				"x-user-data": sessionStorage.getItem("user") as string,

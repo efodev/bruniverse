@@ -1,14 +1,6 @@
 import React, { useState } from "react";
-import {
-	Search,
-	Menu,
-	Heart,
-	Share,
-	Star,
-	Plus,
-	ChevronDown,
-} from "lucide-react";
-import { ReactionState, ReactionType } from "../definitions";
+import { ChevronDown } from "lucide-react";
+import { Post, ReactionState, ReactionType } from "../definitions";
 import { inter } from "../fonts";
 import { Reactions } from "../util/reactions";
 import { createReactionHandler } from "@/app/lib/reactions";
@@ -35,16 +27,6 @@ interface LeftSidebarProps {
 	options: LeftSideBarTopLevelItemsProps[];
 }
 
-export interface Post {
-	id: string;
-	title: string;
-	content: string;
-	category?: string;
-	author: string;
-	created_at: string;
-	reactions: Partial<Record<ReactionType, ReactionState>>;
-	comments: Post[];
-}
 export const LeftSidebar = ({
 	onCategoryChange,
 	posts,
@@ -195,7 +177,7 @@ export const RightContentArea = ({
 					<div className="flex items-center space-x-3 mb-2">
 						<h3 className="font-semibold">{selectedPost.author}</h3>
 						<span className="text-sm ">
-							{selectedPost.created_at}
+							{selectedPost.createdAt}
 						</span>
 					</div>
 					<div className="inline-block bg-amber-100 px-3 py-1 rounded-full text-sm font-medium mb-3">
@@ -203,7 +185,7 @@ export const RightContentArea = ({
 					</div>
 					<h2 className="text-xl font-black text-[#5D3B28] mb-4 flex items-center">
 						{selectedPost.title}
-						<span className="ml-3 text-sm text-amber-600 font-normal">
+						<span className="ml-5 text-sm text-amber-600 font-normal">
 							#{selectedPost.id}
 						</span>
 					</h2>
