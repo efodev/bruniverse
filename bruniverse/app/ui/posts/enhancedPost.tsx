@@ -14,6 +14,7 @@ import { PostCreationModal } from "./create";
 import { Post } from "../definitions";
 import { fetchPosts } from "@/app/lib/post/util";
 import { fetchCategories } from "@/app/post/all/page";
+import { PostNavigation } from "../navigation";
 
 // Types
 interface Category {
@@ -675,39 +676,44 @@ const EnhancedMainPostPage = () => {
 		<div
 			className={`min-h-screen ${createPost ? "bg-[#ADA89B]" : "bg-[#FEF4DC]"}`}
 		>
+			<header>
+				<PostNavigation />
+			</header>
 			{/* Main Content */}
-			<div className="flex h-[calc(100vh-64px)]">
-				<EnhancedLeftSidebar
-					posts={posts}
-					selectedPost={selectedPost}
-					onPostSelect={setSelectedPost}
-					options={topLevelItems}
-					onCategoryChange={handleCategoryChange}
-					pagination={pagination}
-					onPageChange={handlePageChange}
-					isLoading={isLoading}
-					isMobile={isMobile}
-					isOpen={sidebarOpen}
-					onToggle={() => setSidebarOpen(!sidebarOpen)}
-					// searchBar={/*{ show: true, onSearch: handleSearch }*/}
-					createPostButton={{
-						show: true,
-						onClick: () => setCreatePost(true),
-					}}
-				/>
+			<main>
+				<div className="flex h-[calc(100vh-80px)]">
+					<EnhancedLeftSidebar
+						posts={posts}
+						selectedPost={selectedPost}
+						onPostSelect={setSelectedPost}
+						options={topLevelItems}
+						onCategoryChange={handleCategoryChange}
+						pagination={pagination}
+						onPageChange={handlePageChange}
+						isLoading={isLoading}
+						isMobile={isMobile}
+						isOpen={sidebarOpen}
+						onToggle={() => setSidebarOpen(!sidebarOpen)}
+						// searchBar={/*{ show: true, onSearch: handleSearch }*/}
+						createPostButton={{
+							show: true,
+							onClick: () => setCreatePost(true),
+						}}
+					/>
 
-				<EnhancedRightContentArea
-					selectedPost={selectedPost}
-					isMobile={isMobile}
-				/>
-			</div>
-			{/* Create Post Modal */}
-			{createPost && (
-				<PostCreationModal
-					onClose={() => setCreatePost(false)}
-					categories={categories}
-				/>
-			)}
+					<EnhancedRightContentArea
+						selectedPost={selectedPost}
+						isMobile={isMobile}
+					/>
+				</div>
+				{/* Create Post Modal */}
+				{createPost && (
+					<PostCreationModal
+						onClose={() => setCreatePost(false)}
+						categories={categories}
+					/>
+				)}
+			</main>
 		</div>
 	);
 };

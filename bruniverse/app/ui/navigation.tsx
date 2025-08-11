@@ -38,7 +38,7 @@ const bearLogo = (
 	<Logo
 		src={logoImage}
 		alt="Bruniverse Logo"
-		className="absolute w-[11.47vw] h-[12.19vh] top-[3vh] left-[8.96vw] m-0 p-0 box-border"
+		className="relative size-30 -top-7 m-0 p-0"
 		aspectRatio={1}
 		width={150}
 		height={150}
@@ -427,19 +427,19 @@ export const NavBar: React.FC<NavBarProps> = ({
 	);
 };
 
-export // Navigation Component with flexible positioning
-type position = "left" | "center" | "right";
+export type position = "left" | "center" | "right";
+
 interface PostNavigationProps {
-	logo: { show: boolean; position?: position; src: string; style?: string };
-	menuButton: { show: boolean; position?: position; style?: string };
-	navItems: NavItem[];
-	searchBar: {
+	logo?: { show: boolean; position?: position; src: string; style?: string };
+	menuButton?: { show: boolean; position?: position; style?: string };
+	navItems?: NavItem[];
+	searchBar?: {
 		show: boolean;
 		position?: position;
 		placeholder?: string;
 		style?: string;
 	};
-	userSection: {
+	userSection?: {
 		show: boolean;
 		position?: position;
 		style?: string;
@@ -449,30 +449,54 @@ interface PostNavigationProps {
 }
 
 /**
- * Second Navigation bar, currently used for post page. This will be updated to
- * accommodate
- * @param param
- * @returns
+ * Second Navigation bar with improved positioning and 64px height
  */
 export const PostNavigation = ({
 	logo = { show: true, position: "left", src: "" },
-	menuButton = { show: true, position: "left" },
-	navItems = [],
-	searchBar = { show: true, position: "center", placeholder: "Search Posts" },
+	menuButton = {
+		show: true,
+		position: "left",
+		style: "absolute top-4 left-4 size-10",
+	},
+	navItems = [
+		{
+			label: "About",
+			style: "hover:text-amber-400 font-extrabold text-3xl tracking",
+			action: () => console.log("About clicked"),
+			link: "/About",
+		},
+		{
+			label: "Team",
+			style: "hover:text-amber-400 font-extrabold text-3xl tracking",
+			action: () => console.log("Team clicked"),
+			link: "/Team",
+		},
+	],
+	searchBar = {
+		show: true,
+		position: "center",
+		placeholder: "Search Posts",
+		style: "",
+	},
 	userSection = {
 		show: true,
 		position: "right",
-	}, // handle avatars later
+		style: "absolute top-2 right-4",
+	},
 	className = "",
 }: PostNavigationProps) => {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 
 	const renderLogo = () => (
 		<div
-			className="flex items-center"
+			className="flex items-center absolute top-3 left-16"
 			key="logo"
 		>
-			{logo.src ? <Logo className={logo.style} /> : bearLogo}
+			{logo.src ? (
+				<Logo className={`h-10 w-auto ${logo.style}`} />
+			) : (
+				bearLogo
+			)}
 		</div>
 	);
 
@@ -480,22 +504,25 @@ export const PostNavigation = ({
 		<button
 			key="menu"
 			onClick={() => setIsMenuOpen(!isMenuOpen)}
-			className={`flex items-center p-2 hover:bg-amber-50 rounded-lg transition-colors block ${menuButton.style}`}
+			className={`flex items-center justify-center p-2 hover:bg-amber-100 rounded-lg transition-colors duration-200 ${menuButton.style}`}
 		>
-			<Menu className="text-amber-900 w-full h-full" />
+			<Menu className="text-amber-900 w-full h-full hover:text-amber-700" />
 		</button>
 	);
 
 	const renderNavItems = () => (
 		<div
-			className="hidden md:flex items-center space-x-8"
+			className="relative hidden md:flex items-center space-x-6 top-1/2 left-64 transform -translate-y-1/2"
 			key="nav-items"
 		>
 			{navItems.map((item, index) => (
 				<button
 					key={index}
 					onClick={item.action}
-					className={`font-medium transition-colors ${item.style || "text-amber-900 hover:text-amber-700"}`}
+					className={`font-medium transition-colors duration-200 px-3 py-2 rounded-md ${
+						item.style ||
+						"text-amber-900 hover:text-amber-700 hover:bg-amber-50 active:text-amber-800"
+					}`}
 				>
 					{item.label}
 				</button>
@@ -505,17 +532,18 @@ export const PostNavigation = ({
 
 	const renderSearchBar = () => (
 		<div
-			className="flex-1 max-w-md mx-4"
 			key="search"
+			className={`relative left-1/3 -top-7 h-10 w-1/3 ml-5 ${searchBar.style}`}
 		>
-			<div className={`${searchBar.style}`}>
-				<Search
-					className={`absolute left-2 top-3 w-[5%] h-[39%]`}
-				/>
+			<div className="relative w-full h-full">
+				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-amber-600" />
 				<input
 					type="text"
 					placeholder={searchBar.placeholder}
-					className="w-full pl-10 py-2 bg-[#CC810033] border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent text-#808080"
+					className="w-full h-full pl-10 pr-4 bg-[#CC810033] border border-amber-200 rounded-lg 
+						focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent 
+						text-gray-700 placeholder-gray-500 transition-all duration-200
+						hover:bg-[#CC810040] hover:border-amber-300"
 				/>
 			</div>
 		</div>
@@ -529,20 +557,21 @@ export const PostNavigation = ({
 		};
 		return (
 			<div
-				className="flex flex-col items-center space-y-1 absolute top-[3vh] right-[4vw]"
+				className={`flex flex-col items-center space-y-1 text-center mr-10 ${userSection.style}`}
 				key="user"
 			>
 				<div
-					className={`w-20 h-20 bg-[#713F12] rounded-full flex items-center justify-center
-						 text-white font-medium text-6xl ${inter.className} ${userSection.style}`}
+					className={`size-18 bg-[#713F12] rounded-full flex items-center justify-center
+						 text-white font-medium text-6xl transition-all duration-200
+						 hover:bg-[#8B4513] hover:shadow-lg cursor-pointer ${inter.className}`}
 				>
 					{username ? username[0].toLocaleUpperCase() : "B"}
 				</div>
-				<div className="hidden md:block text-center">
-					<div className="text-sm font-medium text-amber-900">
+				<div className="hidden md:block">
+					<div className="text-sm font-medium">
 						{username || "Bruno"}
 					</div>
-					<div className="text-xs text-amber-600">ID: 652397</div>
+					<div className="text-xs text-gray-600">ID: 652397</div>
 				</div>
 			</div>
 		);
@@ -552,29 +581,19 @@ export const PostNavigation = ({
 	const centerItems = [];
 	const rightItems = [];
 
-	// Position items based on configuration
-	if (logo.show && logo.position === "left") leftItems.push(renderLogo());
-	if (menuButton.show && menuButton.position === "left")
-		leftItems.push(renderMenuButton());
+	// Position items based on configuration - but most use absolute positioning now
+	if (logo.show) leftItems.push(renderLogo());
+	if (menuButton.show) leftItems.push(renderMenuButton());
 	if (navItems.length > 0) leftItems.push(renderNavItems());
-
-	if (searchBar.show && searchBar.position === "center")
-		centerItems.push(renderSearchBar());
-
-	if (userSection.show && userSection.position === "right")
-		rightItems.push(renderUserSection());
+	if (searchBar.show) centerItems.push(renderSearchBar());
+	if (userSection.show) rightItems.push(renderUserSection());
 
 	return (
-		<nav
-			className={`bg-amber-25  px-4 py-3 min-w-full box-border ${className}`}
-		>
-			<div className="min-w-full mx-auto flex items-center justify-between">
-				<div className="flex items-center space-x-4">{leftItems}</div>
-				<div className="flex items-center flex-1 justify-center">
-					{centerItems}
-				</div>
-				<div className="flex items-center">{rightItems}</div>
-			</div>
+		<nav className={`bg-amber-25 h-20 w-full relative ${className}`}>
+			{/* Render all items - they'll position themselves absolutely */}
+			{leftItems}
+			{centerItems}
+			{rightItems}
 		</nav>
 	);
 };
