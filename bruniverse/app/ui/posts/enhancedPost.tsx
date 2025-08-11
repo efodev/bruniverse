@@ -292,7 +292,7 @@ const EnhancedLeftSidebar = ({
 							</button>
 
 							{item.hasDropdown && openDropdown === item.id && (
-								<div className="absolute top-full left-0 mt-1 bg-[#713F12] rounded-lg shadow-lg border border-amber-200 z-10 min-w-max divide-y-[0.01px]">
+								<div className="absolute top-full left-0 mt-1 bg-[#713F12] rounded-lg shadow-lg border border-amber-200 z-10 w-max divide-y-[0.01px]">
 									{item.dropdownItems?.map((dropdownItem) => (
 										<button
 											key={dropdownItem.id}
@@ -301,7 +301,7 @@ const EnhancedLeftSidebar = ({
 													dropdownItem.id
 												)
 											}
-											className="block w-full text-left px-4 py-2 text-sm text-white font-medium hover:text-red-600 border-[#CC8100B0] first:rounded-t-lg last:rounded-b-lg"
+											className="block w-full text-left px-2 py-1 text-sm text-white font-medium hover:text-red-600 border-[#CC8100B0] first:rounded-t-lg last:rounded-b-lg"
 										>
 											{dropdownItem.name}
 										</button>
