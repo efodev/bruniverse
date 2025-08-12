@@ -1,6 +1,6 @@
 // Example backend integration function
 import { ReactionType } from "../ui/definitions";
-export const createReactionHandler = (userId: string) => {
+export const createReactionHandler = () => {
 	return async (
 		reactionType: ReactionType,
 		postId?: string,
@@ -12,7 +12,6 @@ export const createReactionHandler = (userId: string) => {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({
-				userId,
 				reactionType,
 				postId: postId || null,
 				commentId: commentId || null,

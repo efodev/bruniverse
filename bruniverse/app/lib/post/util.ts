@@ -500,7 +500,8 @@ export const fetchPosts = async (
 		},
 	});
 
-	return await response.json();
+	const body = await response.json();
+	return body;
 };
 
 /**
@@ -529,7 +530,6 @@ export const createPost = async (post: {}) => {
 
 		return await res.json();
 	} catch (error) {
-		console.log(error);
 		return {
 			success: false,
 			error: "INTERNAL_ERROR",

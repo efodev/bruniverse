@@ -440,8 +440,7 @@ const EnhancedRightContentArea = ({
 	selectedPost: Post | null;
 	isMobile: boolean;
 }) => {
-	const userId = "";
-	const handleReaction = createReactionHandler(userId);
+	const handleReaction = createReactionHandler();
 	// Helper  posting functionfunction
 	if (!selectedPost) {
 		return (

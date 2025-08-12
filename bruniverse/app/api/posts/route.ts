@@ -102,30 +102,30 @@ const getPostsBaseQuery = `
   LEFT JOIN (
     SELECT post_id, COUNT(*) as count 
     FROM reactions 
-    WHERE reaction_type = 'like' AND post_id IS NOT NULL
+    WHERE reaction_type = 'heart' AND post_id IS NOT NULL
     GROUP BY post_id
   ) like_count ON p.id = like_count.post_id
   LEFT JOIN (
     SELECT post_id, COUNT(*) as count 
     FROM reactions 
-    WHERE reaction_type = 'starred' AND post_id IS NOT NULL
+    WHERE reaction_type = 'star' AND post_id IS NOT NULL
     GROUP BY post_id
   ) starred_count ON p.id = starred_count.post_id
   LEFT JOIN (
     SELECT post_id, COUNT(*) as count 
     FROM reactions 
-    WHERE reaction_type = 'shared' AND post_id IS NOT NULL
+    WHERE reaction_type = 'share' AND post_id IS NOT NULL
     GROUP BY post_id
   ) shared_count ON p.id = shared_count.post_id
   LEFT JOIN reactions user_like ON p.id = user_like.post_id 
     AND user_like.user_id = $userIdParam 
-    AND user_like.reaction_type = 'like'
+    AND user_like.reaction_type = 'heart'
   LEFT JOIN reactions user_starred ON p.id = user_starred.post_id 
     AND user_starred.user_id = $userIdParam 
-    AND user_starred.reaction_type = 'starred'
+    AND user_starred.reaction_type = 'star'
   LEFT JOIN reactions user_shared ON p.id = user_shared.post_id 
     AND user_shared.user_id = $userIdParam 
-    AND user_shared.reaction_type = 'shared'
+    AND user_shared.reaction_type = 'share'
   LEFT JOIN (
     SELECT post_id, COUNT(*) as count 
     FROM comments 
@@ -205,30 +205,30 @@ const getNestedCommentsForPostQuery = `
     LEFT JOIN (
       SELECT comment_id, COUNT(*) as count 
       FROM reactions 
-      WHERE reaction_type = 'like' AND comment_id IS NOT NULL
+      WHERE reaction_type = 'heart' AND comment_id IS NOT NULL
       GROUP BY comment_id
     ) like_count ON ct.id = like_count.comment_id
     LEFT JOIN (
       SELECT comment_id, COUNT(*) as count 
       FROM reactions 
-      WHERE reaction_type = 'starred' AND comment_id IS NOT NULL
+      WHERE reaction_type = 'star' AND comment_id IS NOT NULL
       GROUP BY comment_id
     ) starred_count ON ct.id = starred_count.comment_id
     LEFT JOIN (
       SELECT comment_id, COUNT(*) as count 
       FROM reactions 
-      WHERE reaction_type = 'shared' AND comment_id IS NOT NULL
+      WHERE reaction_type = 'share' AND comment_id IS NOT NULL
       GROUP BY comment_id
     ) shared_count ON ct.id = shared_count.comment_id
     LEFT JOIN reactions user_like ON ct.id = user_like.comment_id 
       AND user_like.user_id = $1 
-      AND user_like.reaction_type = 'like'
+      AND user_like.reaction_type = 'heart'
     LEFT JOIN reactions user_starred ON ct.id = user_starred.comment_id 
       AND user_starred.user_id = $1 
-      AND user_starred.reaction_type = 'starred'
+      AND user_starred.reaction_type = 'star'
     LEFT JOIN reactions user_shared ON ct.id = user_shared.comment_id 
       AND user_shared.user_id = $1 
-      AND user_shared.reaction_type = 'shared'
+      AND user_shared.reaction_type = 'share'
     LEFT JOIN (
       SELECT parent_comment_id, COUNT(*) as count 
       FROM comments 
@@ -492,15 +492,15 @@ export async function GET(request: NextRequest) {
 					view_count: post.view_count,
 					is_pinned: post.is_pinned,
 					reactions: {
-						like: {
+						heart: {
 							isActive: post.user_liked,
 							count: post.like_count,
 						},
-						starred: {
+						star: {
 							isActive: post.user_starred,
 							count: post.starred_count,
 						},
-						shared: {
+						share: {
 							isActive: post.user_shared,
 							count: post.shared_count,
 						},
