@@ -344,7 +344,7 @@ const EnhancedLeftSidebar = ({
 							>
 								{/* Add a function to update user modal with random colors */}
 								<div className="flex items-start space-x-3">
-									<div className="size-13 bg-amber-600 rounded-full flex items-center justify-center text-white font-semibold text-4xl">
+									<div className="size-10 bg-amber-600 rounded-full flex items-center justify-center text-white font-semibold text-xl">
 										{post.author.charAt(0)}
 									</div>
 									<div className="flex-1 min-w-0">
@@ -464,7 +464,7 @@ const EnhancedRightContentArea = ({
 			<div className="p-6">
 				{/* Post Header */}
 				<div className="flex items-start space-x-4 mb-6">
-					<div className="size-18 bg-amber-900 rounded-full flex items-center justify-center text-white font-semibold text-5xl">
+					<div className="w-[clamp(2.5rem,3.5rem,4.5rem)] h-[clamp(2.5rem,3.5rem,4.5rem)] bg-amber-900 rounded-full flex items-center justify-center text-white font-semibold text-[clamp(1.8rem,2.8rem,3.8rem)]">
 						{selectedPost.author.charAt(0)}
 					</div>
 					<div className="flex-1">
@@ -669,12 +669,12 @@ const EnhancedMainPostPage = () => {
 		<div
 			className={`min-h-screen ${createPost ? "bg-[#ADA89B]" : "bg-[#FEF4DC]"}`}
 		>
-			<header>
+			<header className="h-[70px]">
 				<PostNavigation />
 			</header>
 			{/* Main Content */}
-			<main>
-				<div className="flex h-[calc(100vh-80px)]">
+			<main className="mt-2">
+				<div className="flex h-[calc(100vh-70px)]">
 					<EnhancedLeftSidebar
 						posts={posts}
 						selectedPost={selectedPost}

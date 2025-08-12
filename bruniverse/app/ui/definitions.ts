@@ -51,7 +51,7 @@ export interface NavItem {
 	icon?: React.ReactNode;
 	children?: NavItem[];
 	style?: string;
-	action?: () => void;
+	action: () => void;
 }
 
 // Navigation component props
