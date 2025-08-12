@@ -507,13 +507,8 @@ const EnhancedRightContentArea = ({
 				<div className="flex items-center space-x-6 text-gray-600 mb-8 pb-6 border-b border-gray-200">
 					<Reactions
 						postId={selectedPost.id}
-						userId={"1"}
 						onReact={handleReaction}
-						initialStates={{
-							heart: { isActive: false, count: 5 },
-							share: { isActive: true, count: 2 },
-							star: { isActive: false, count: 8 },
-						}}
+						initialStates={selectedPost.reactions}
 					/>
 				</div>
 
@@ -538,8 +533,7 @@ const EnhancedRightContentArea = ({
 									<div className="flex space-x-3">
 										<Reactions
 											size={14}
-											commentId="comment-789"
-											userId={"1"}
+											commentId={comment.id}
 											onReact={handleReaction}
 											allowedReactions={{
 												heart: true,

@@ -128,7 +128,7 @@ export interface ReactionProps {
 	size?: number;
 	postId?: string;
 	commentId?: string;
-	userId: string;
+	userId?: string;
 	onReact: (
 		reactionType: ReactionType,
 		postId?: string,
