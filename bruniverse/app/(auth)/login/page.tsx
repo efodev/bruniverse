@@ -26,7 +26,7 @@ export default function LoginPage() {
 				return message;
 			}
 			// If login is successful, redirect to the home page or dashboard
-			window.location.href = "/";
+			window.location.href = "/post";
 		} catch (error) {
 			if (error instanceof Error) {
 				console.error("Error during login:", error.message);

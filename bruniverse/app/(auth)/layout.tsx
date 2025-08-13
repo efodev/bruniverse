@@ -1,22 +1,18 @@
 /// app/auth/layout.tsx
-import { NavBar } from "../ui/navigation";
+import { NavBar, PostNavigation } from "../ui/navigation";
 import Link from "next/link";
 
-
-export default function AuthLayout({ children}: { children: React.ReactNode }) {
-
+export default function AuthLayout({
+	children,
+}: {
+	children: React.ReactNode;
+}) {
 	return (
-		<>
-			<NavBar
-				user={undefined}
-				position="top"
-				variant="minimal"
-				isLoggedIn={false}
-				showNotifications={false}
-				showSearch={false}
-			/>
-
-			<main className="overflow-hidden py-3 px-4">
+		<div>
+			<header className="h-[80px]">
+				<PostNavigation />
+			</header>
+			<main className="h-[calc(100vh-80px)]">
 				{children}
 				<p className="text-sm text-gray-600 text-center mt-5">
 					Have question? Ask{" "}
@@ -30,6 +26,6 @@ export default function AuthLayout({ children}: { children: React.ReactNode }) {
 					<Link href={"/privacy-policy"}>Privacy|Terms</Link>
 				</p>
 			</footer>
-		</>
+		</div>
 	);
 }
