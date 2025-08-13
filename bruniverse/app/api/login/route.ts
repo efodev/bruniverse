@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 import rateLimit from "next-rate-limit";
-import { NextApiResponse } from "next";
 import { NextRequest, NextResponse } from "next/server";
 import { handleAuthOperation } from "@/app/lib/auth/services";
 
@@ -53,26 +52,16 @@ export async function POST(request: NextRequest) {
 		// Create JWT token.
 		const token = jwt.sign(
 			{
-				userId: data.id,
+				id: data.id,
 				email: data.brown_email,
 			},
 			process.env.JWT_SECRET!,
 			{
 				expiresIn: "7d",
-				issuer: "bruviverse",
+				issuer: "bruniverse",
 				audience: `${data.id}`,
 			}
 		);
-		return NextResponse.json({
-			success: true,
-			message: "Login successful",
-			data: {
-				id: data.id,
-				email: data.email,
-				lastLogin: data.last_login,
-			},
-		});
-
 		return NextResponse.json(
 			{
 				success: true,

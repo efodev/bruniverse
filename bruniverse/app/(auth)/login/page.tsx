@@ -21,6 +21,7 @@ export default function LoginPage() {
 			});
 
 			const { success, data, message } = await res.json();
+			sessionStorage.setItem("user", JSON.stringify(data));
 			if (!success) {
 				return message;
 			}

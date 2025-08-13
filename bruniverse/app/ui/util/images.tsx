@@ -1,5 +1,5 @@
 // app/ui/util/images.tsx
-"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { LogoProps } from "../definitions";
@@ -18,10 +18,10 @@ export default function Logo({
 	let finalWidth: number;
 	let finalHeight: number;
 
-	if (width && !height) {
+	if (aspectRatio && width && !height) {
 		finalWidth = width;
 		finalHeight = Math.round(width / aspectRatio);
-	} else if (height && !width) {
+	} else if (aspectRatio && height && !width) {
 		finalHeight = height;
 		finalWidth = Math.round(height * aspectRatio);
 	} else if (width && height) {
@@ -29,8 +29,8 @@ export default function Logo({
 		finalHeight = height;
 	} else {
 		// Default dimensions
-		finalWidth = 120;
-		finalHeight = Math.round(120 / aspectRatio);
+		finalWidth = 150;
+		finalHeight = 150;
 	}
 
 	const logoImage = (

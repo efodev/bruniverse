@@ -7,7 +7,6 @@ export async function handleAuthOperation(
 	req: Record<string, string | number | boolean | any>
 ) {
 	// Common error handling, logging, rate limiting
-	console.log("Handling login operation");
 	switch (operation) {
 		case "signup":
 			return signupDb(req);

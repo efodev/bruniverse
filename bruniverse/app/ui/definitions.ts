@@ -50,6 +50,8 @@ export interface NavItem {
 	link: string;
 	icon?: React.ReactNode;
 	children?: NavItem[];
+	style?: string;
+	action?: () => void;
 }
 
 // Navigation component props
@@ -68,7 +70,7 @@ export interface NavigationProps {
 export interface MyUser {
 	username: string;
 	email?: string;
-	avatar: React.ReactNode;
+	avatar?: React.ReactNode;
 }
 
 export interface NavBarProps {
@@ -83,7 +85,7 @@ export interface NavBarProps {
 export interface LogoProps {
 	src?: string | StaticImageData;
 	alt?: string;
-	aspectRatio: number;
+	aspectRatio?: number;
 	width?: number;
 	height?: number;
 	href?: string;
@@ -112,4 +114,67 @@ export interface EmailVerificationProps {
 export interface EmailVerificationResult {
 	success: boolean;
 	message: string;
+}
+
+// Reactions
+export type ReactionType = "heart" | "share" | "star";
+
+export interface ReactionState {
+	isActive: boolean;
+	count: number;
+}
+
+export interface ReactionProps {
+	size?: number;
+	postId?: string;
+	commentId?: string;
+	userId: string;
+	onReact: (
+		reactionType: ReactionType,
+		postId?: string,
+		commentId?: string
+	) => Promise<{ count: number; isActive: boolean }>;
+	allowedReactions?: {
+		heart?: boolean;
+		share?: boolean;
+		star?: boolean;
+	};
+	initialStates?: Partial<Record<ReactionType, ReactionState>>;
+	className?: string;
+}
+
+// Category
+export interface Category {
+	id: string;
+	name: string;
+	description?: string;
+	color_hex?: string;
+}
+
+export // Drafts Sidebar Component
+interface Draft {
+	id?: string;
+	user_id?: number;
+	title: string;
+	content: string;
+	category: Category;
+	date: string;
+	is_anonymous: boolean;
+	status?: string;
+	auto_save_count?: number;
+	created_at?: string;
+	updated?: string;
+	last_accessed_at?: string;
+}
+
+export interface Post {
+	id: string;
+	title: string;
+	content: string;
+	category?: string;
+	author: string;
+	createdAt: string;
+	threadNumber?: number;
+	reactions: Partial<Record<ReactionType, ReactionState>>;
+	comments: Post[];
 }
