@@ -676,7 +676,7 @@ const EnhancedMainPostPage = () => {
 		<div
 			className={`min-h-screen ${createPost ? "bg-[#ADA89B]" : "bg-[#FEF4DC]"}`}
 		>
-			<header>
+			<header className="h-[80px]">
 				<PostNavigation />
 			</header>
 			{/* Main Content */}

@@ -452,77 +452,104 @@ interface PostNavigationProps {
  * Second Navigation bar with improved positioning and 64px height
  */
 export const PostNavigation = ({
-	logo = { show: true, position: "left", src: "" },
-	menuButton = {
-		show: true,
-		position: "left",
-		style: "absolute top-4 left-4 size-10",
-	},
+	logo = { show: true, src: "" },
+	menuButton = { show: true, style: "" },
 	navItems = [
 		{
 			label: "About",
-			style: "hover:text-amber-400 font-extrabold text-3xl tracking",
+			style: "hover:text-amber-400 font-extrabold tracking-wide transition-all duration-300 hover:scale-105",
 			action: () => console.log("About clicked"),
 			link: "/About",
 		},
 		{
 			label: "Team",
-			style: "hover:text-amber-400 font-extrabold text-3xl tracking",
+			style: "hover:text-amber-400 font-extrabold tracking-wide transition-all duration-300 hover:scale-105",
 			action: () => console.log("Team clicked"),
 			link: "/Team",
 		},
 	],
 	searchBar = {
 		show: true,
-		position: "center",
 		placeholder: "Search Posts",
 		style: "",
 	},
 	userSection = {
 		show: true,
-		position: "right",
-		style: "absolute top-2 right-4",
+		style: "",
 	},
 	className = "",
 }: PostNavigationProps) => {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const [isMobile, setIsMobile] = useState(false);
 
-	const renderLogo = () => (
-		<div
-			className="flex items-center absolute top-3 left-16"
-			key="logo"
-		>
-			{logo.src ? (
-				<Logo className={`h-10 w-auto ${logo.style}`} />
-			) : (
-				bearLogo
-			)}
-		</div>
+	// Responsive breakpoint detection
+	useEffect(() => {
+		const checkMobile = () => setIsMobile(window.innerWidth < 768);
+		checkMobile();
+		window.addEventListener("resize", checkMobile);
+		return () => window.removeEventListener("resize", checkMobile);
+	}, []);
+
+	const bearLogo = (
+		<Logo
+			src={logoImage}
+			alt="Bruniverse Logo"
+			className="w-full h-full object-contain"
+			aspectRatio={1}
+			href="/"
+		/>
 	);
 
 	const renderMenuButton = () => (
-		<button
-			key="menu"
-			onClick={() => setIsMenuOpen(!isMenuOpen)}
-			className={`flex items-center justify-center p-2 hover:bg-amber-100 rounded-lg transition-colors duration-200 ${menuButton.style}`}
-		>
-			<Menu className="text-amber-900 w-full h-full hover:text-amber-700" />
-		</button>
+		<div className="flex items-center justify-center w-full h-full">
+			<button
+				onClick={() => setIsMenuOpen(!isMenuOpen)}
+				className={`
+					w-[clamp(2rem,4vw,3rem)] h-[clamp(2rem,4vw,3rem)]
+					flex items-center justify-center
+					hover:bg-amber-100/80 active:bg-amber-200/80
+					rounded-xl transition-all duration-300 ease-out
+					hover:shadow-lg hover:scale-110 active:scale-95
+					backdrop-blur-sm
+					${menuButton.style}
+				`}
+				aria-label="Toggle menu"
+			>
+				<Menu className="w-[65%] h-[65%] text-amber-900 hover:text-amber-700 transition-colors duration-300" />
+			</button>
+		</div>
+	);
+
+	const renderLogo = () => (
+		<div className="flex items-center justify-center h-full w-full">
+			<div className="w-[clamp(4rem,6rem,8rem)] h-[clamp(4rem,6rem,8rem)] flex items-center justify-center">
+				{logo.src ? (
+					<Logo
+						className={`w-full h-full object-contain ${logo.style}`}
+					/>
+				) : (
+					bearLogo
+				)}
+			</div>
+		</div>
 	);
 
 	const renderNavItems = () => (
-		<div
-			className="relative hidden md:flex items-center space-x-6 top-1/2 left-64 transform -translate-y-1/2"
-			key="nav-items"
-		>
+		<div className="hidden lg:flex items-center justify-center h-full w-full space-x-[clamp(1rem,2vw,2rem)]">
 			{navItems.map((item, index) => (
 				<button
 					key={index}
 					onClick={item.action}
-					className={`font-medium transition-colors duration-200 px-3 py-2 rounded-md ${
-						item.style ||
-						"text-amber-900 hover:text-amber-700 hover:bg-amber-50 active:text-amber-800"
-					}`}
+					className={`
+						px-[clamp(0.75rem,1.5vw,1.5rem)] py-[clamp(0.5rem,1vw,1rem)]
+						text-[clamp(1rem,1.8vw,1.5rem)] font-bold
+						text-amber-900 hover:text-amber-400
+						rounded-lg transition-all duration-300 ease-out
+						hover:bg-amber-50/60 hover:shadow-md hover:scale-105
+						active:scale-95 active:bg-amber-100/80
+						backdrop-blur-sm border border-transparent hover:border-amber-200/50
+						${item.style || ""}
+					`}
 				>
 					{item.label}
 				</button>
@@ -530,20 +557,66 @@ export const PostNavigation = ({
 		</div>
 	);
 
-	const renderSearchBar = () => (
+	const renderMobileNavItems = () => (
 		<div
-			key="search"
-			className={`relative left-1/3 -top-7 h-10 w-1/3 ml-5 ${searchBar.style}`}
+			className={`
+			lg:hidden absolute top-full left-0 right-0 z-50
+			bg-amber-25/95 backdrop-blur-md border-t border-amber-200/50
+			shadow-2xl transition-all duration-500 ease-out
+			${
+				isMenuOpen
+					? "opacity-100 translate-y-0 pointer-events-auto"
+					: "opacity-0 -translate-y-4 pointer-events-none"
+			}
+		`}
 		>
-			<div className="relative w-full h-full">
-				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-amber-600" />
+			<div className="flex flex-col p-4 space-y-2">
+				{navItems.map((item, index) => (
+					<button
+						key={index}
+						onClick={() => {
+							item.action && item.action();
+							setIsMenuOpen(false);
+						}}
+						className="
+							w-full text-left px-4 py-3 text-lg font-bold
+							text-amber-900 hover:text-amber-400
+							rounded-lg transition-all duration-300
+							hover:bg-amber-100/60 hover:scale-[1.02]
+							active:scale-95 active:bg-amber-200/60
+						"
+					>
+						{item.label}
+					</button>
+				))}
+			</div>
+		</div>
+	);
+
+	const renderSearchBar = () => (
+		<div className="flex items-center justify-center h-full w-full px-2">
+			<div className="relative w-full max-w-md h-[clamp(2.5rem,4vw,3rem)]">
+				<Search
+					className="
+					absolute left-[clamp(0.75rem,2vw,1rem)] top-1/2 transform -translate-y-1/2 
+					w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)] 
+					text-amber-600/70 transition-colors duration-300"
+				/>
 				<input
 					type="text"
 					placeholder={searchBar.placeholder}
-					className="w-full h-full pl-10 pr-4 bg-[#CC810033] border border-amber-200 rounded-lg 
-						focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent 
-						text-gray-700 placeholder-gray-500 transition-all duration-200
-						hover:bg-[#CC810040] hover:border-amber-300"
+					className={`
+						w-full h-full
+						pl-[clamp(2.5rem,5vw,3.5rem)] pr-[clamp(0.75rem,2vw,1rem)]
+						bg-amber-50/60 backdrop-blur-sm
+						border border-amber-200/50 rounded-2xl
+						text-[clamp(0.875rem,1.5vw,1rem)] text-gray-700 placeholder-amber-600/50
+						transition-all duration-300 ease-out
+						focus:outline-none focus:ring-2 focus:ring-amber-300/60 focus:border-amber-400/60
+						focus:bg-white/80 focus:shadow-lg focus:scale-[1.02]
+						hover:bg-amber-100/60 hover:border-amber-300/60 hover:shadow-md
+						${searchBar.style}
+					`}
 				/>
 			</div>
 		</div>
@@ -555,45 +628,118 @@ export const PostNavigation = ({
 			email: "@brown.edu",
 			avatar: "/",
 		};
+
 		return (
-			<div
-				className={`flex flex-col items-center space-y-1 text-center mr-10 ${userSection.style}`}
-				key="user"
-			>
+			<div className="flex items-center justify-center h-full w-full">
 				<div
-					className={`size-18 bg-[#713F12] rounded-full flex items-center justify-center
-						 text-white font-medium text-6xl transition-all duration-200
-						 hover:bg-[#8B4513] hover:shadow-lg cursor-pointer ${inter.className}`}
+					className={`
+					flex ${isMobile ? "flex-row items-center space-x-2" : "flex-col items-center space-y-1"} 
+					text-center transition-all duration-300
+					${userSection.style}
+				`}
 				>
-					{username ? username[0].toLocaleUpperCase() : "B"}
-				</div>
-				<div className="hidden md:block">
-					<div className="text-sm font-medium">
-						{username || "Bruno"}
+					{/* Avatar */}
+					<div
+						className={`
+						mt-1 w-[clamp(3rem,4rem,5rem)] h-[clamp(3rem,4rem,5rem)]
+						bg-gradient-to-br from-amber-900 to-amber-800
+						rounded-full flex items-center justify-center
+						text-white font-semibold text-[clamp(2rem,3rem,4rem)]
+						transition-all duration-300 ease-out
+						hover:shadow-xl hover:scale-110 hover:rotate-3
+						active:scale-95 cursor-pointer
+						border-2 border-amber-200/20 hover:border-amber-300/40
+						${inter?.className || ""}
+					`}
+					>
+						{username ? username[0].toLocaleUpperCase() : "B"}
 					</div>
-					<div className="text-xs text-gray-600">ID: 652397</div>
+
+					{/* User Info */}
+					<div
+						className={`${isMobile ? "flex flex-col" : "hidden md:block"} transition-all duration-300`}
+					>
+						<div className="text-[clamp(0.75rem,1.2vw,0.875rem)] font-semibold text-amber-900">
+							{username || "Bruno"}
+						</div>
+						<div className="text-[clamp(0.625rem,1vw,0.75rem)] text-amber-700/70 font-medium"></div>
+					</div>
 				</div>
 			</div>
 		);
 	};
 
-	const leftItems = [];
-	const centerItems = [];
-	const rightItems = [];
-
-	// Position items based on configuration - but most use absolute positioning now
-	if (logo.show) leftItems.push(renderLogo());
-	if (menuButton.show) leftItems.push(renderMenuButton());
-	if (navItems.length > 0) leftItems.push(renderNavItems());
-	if (searchBar.show) centerItems.push(renderSearchBar());
-	if (userSection.show) rightItems.push(renderUserSection());
-
 	return (
-		<nav className={`bg-amber-25 h-20 w-full relative ${className}`}>
-			{/* Render all items - they'll position themselves absolutely */}
-			{leftItems}
-			{centerItems}
-			{rightItems}
-		</nav>
+		<>
+			<nav
+				className={`
+				h-full w-full relative
+				shadow-lg shadow-amber-100/20 mt-0
+				${className}
+			`}
+			>
+				{/* Main Navigation Grid */}
+				<div className="h-full w-full grid grid-cols-12 gap-2 px-[clamp(0.5rem,2vw,1.5rem)]">
+					{/* Menu Button - Mobile/Tablet */}
+					{menuButton.show && (
+						<div className="lg:hidden col-span-1 flex items-center">
+							{renderMenuButton()}
+						</div>
+					)}
+
+					{/* Logo */}
+					{logo.show && (
+						<div
+							className={`
+							${menuButton.show ? "lg:col-span-2 col-span-2" : "lg:col-span-2 col-span-3"}
+							flex items-center hover:scale-110
+						`}
+						>
+							{renderLogo()}
+						</div>
+					)}
+
+					{/* Navigation Items - Desktop Only */}
+					{navItems.length > 0 && (
+						<div className="hidden lg:block lg:col-span-3">
+							{renderNavItems()}
+						</div>
+					)}
+
+					{/* Search Bar */}
+					{searchBar.show && (
+						<div
+							className={`
+							${navItems.length > 0 ? "lg:col-span-4 col-span-6" : "lg:col-span-6 col-span-6"}
+						`}
+						>
+							{renderSearchBar()}
+						</div>
+					)}
+
+					{/* User Section */}
+					{userSection.show && (
+						<div
+							className={`
+							${navItems.length > 0 ? "lg:col-span-3 col-span-3" : "lg:col-span-4 col-span-3"}
+						`}
+						>
+							{renderUserSection()}
+						</div>
+					)}
+				</div>
+			</nav>
+
+			{/* Mobile Navigation Menu */}
+			{renderMobileNavItems()}
+
+			{/* Mobile Menu Overlay */}
+			{isMenuOpen && (
+				<div
+					className="lg:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-30"
+					onClick={() => setIsMenuOpen(false)}
+				/>
+			)}
+		</>
 	);
 };
