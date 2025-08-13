@@ -663,7 +663,7 @@ export const PostNavigation = ({
 		<>
 			<nav
 				className={`
-				h-full w-full relative z-40
+				h-full w-full relative
 				shadow-lg shadow-amber-100/20 mt-0
 				${className}
 			`}

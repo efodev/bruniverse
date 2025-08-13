@@ -159,7 +159,7 @@ export const PostCreationModal = ({
 
 	return (
 		<div
-			className={`absolute top-[7%] left-1/2 transform -translate-x-1/2 bg-[#FEF4DC] rounded-[2.8vw] w-[90%] h-[86%]
+			className={`absolute top-[9%] left-1/2 transform -translate-x-1/2 bg-[#FEF4DC] rounded-[2.8vw] w-[90%] h-[86%]
 				border-2 box-border ${className}`}
 		>
 			{addPostStatus && (

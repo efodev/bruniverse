@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
 	Plus,
 	ChevronDown,
@@ -11,7 +11,7 @@ import {
 import { Reactions } from "../util/reactions";
 import { createReactionHandler } from "@/app/lib/reactions";
 import { PostCreationModal } from "./create";
-import { Post } from "../definitions";
+import { Post, Comment } from "../definitions";
 import { fetchPosts } from "@/app/lib/post/util";
 import { fetchCategories } from "@/app/post/all/page";
 import { PostNavigation } from "../navigation";
@@ -37,101 +37,101 @@ interface LeftSideBarTopLevelItemsProps {
 }
 
 // Mock API functions
-const fetchMockPosts = async (
-	page: number,
-	category: string,
-	search: string
-): Promise<{ posts: Post[]; pagination: PaginationInfo }> => {
-	// Simulate API delay
-	await new Promise((resolve) => setTimeout(resolve, 300));
+// const fetchMockPosts = async (
+// 	page: number,
+// 	category: string,
+// 	search: string
+// ): Promise<{ posts: Post[]; pagination: PaginationInfo }> => {
+// 	// Simulate API delay
+// 	await new Promise((resolve) => setTimeout(resolve, 300));
 
-	const mockPosts = [
-		{
-			id: "170",
-			title: "Looking for Internship Advice",
-			author: "Melody Chen",
-			createdAt: "2 days ago",
-			category: "questions",
-			reactions: {
-				heart: { isActive: true, count: 12 },
-				star: { isActive: false, count: 3 },
-			},
-			content: `Hey everyone! 👋\nHope you're all doing great! I'm currently starting to think about internships and wanted to ask for some advice from folks who've been through the process. I'm especially interested in roles related to creative tech, product design, music + AI.\nFeel free to drop any advice here or DM me — I really appreciate it! 🙏\nThanks in advance!!`,
-			comments: [
-				{
-					id: "1",
-					title: "",
-					content:
-						"Hi! I'm here offering some advice. I would say talk to people from both the CS department and Music Department at Brown.",
-					category: "",
-					author: "Bruce Liang",
-					createdAt: "",
-					reactions: {
-						heart: { isActive: true, count: 5 },
-						star: { isActive: false, count: 4 },
-					},
-					comments: [],
-				},
-			],
-		},
-		{
-			id: "169",
-			title: "Study Group for CS150",
-			author: "Alex Kim",
-			createdAt: "1 day ago",
-			category: "on-campus",
-			reactions: {
-				heart: { isActive: true, count: 12 },
-				star: { isActive: false, count: 3 },
-			},
-			content: `Looking for people to form a study group for CS150. We can meet twice a week to go over problem sets and prepare for exams together.`,
-			comments: [
-				{
-					id: "2",
-					title: "",
-					content: "I'm interested! What days work best for you?",
-					category: "",
-					author: "Sarah Johnson",
-					createdAt: "",
-					reactions: {
-						heart: { isActive: true, count: 12 },
-						star: { isActive: false, count: 3 },
-					},
-					comments: [],
-				},
-			],
-		},
-		// Add more mock posts...
-	];
+// 	const mockPosts = [
+// 		{
+// 			id: "170",
+// 			title: "Looking for Internship Advice",
+// 			author: "Melody Chen",
+// 			createdAt: "2 days ago",
+// 			category: "questions",
+// 			reactions: {
+// 				heart: { isActive: true, count: 12 },
+// 				star: { isActive: false, count: 3 },
+// 			},
+// 			content: `Hey everyone! 👋\nHope you're all doing great! I'm currently starting to think about internships and wanted to ask for some advice from folks who've been through the process. I'm especially interested in roles related to creative tech, product design, music + AI.\nFeel free to drop any advice here or DM me — I really appreciate it! 🙏\nThanks in advance!!`,
+// 			comments: [
+// 				{
+// 					id: "1",
+// 					title: "",
+// 					content:
+// 						"Hi! I'm here offering some advice. I would say talk to people from both the CS department and Music Department at Brown.",
+// 					category: "",
+// 					author: "Bruce Liang",
+// 					createdAt: "",
+// 					reactions: {
+// 						heart: { isActive: true, count: 5 },
+// 						star: { isActive: false, count: 4 },
+// 					},
+// 					comments: [],
+// 				},
+// 			],
+// 		},
+// 		{
+// 			id: "169",
+// 			title: "Study Group for CS150",
+// 			author: "Alex Kim",
+// 			createdAt: "1 day ago",
+// 			category: "on-campus",
+// 			reactions: {
+// 				heart: { isActive: true, count: 12 },
+// 				star: { isActive: false, count: 3 },
+// 			},
+// 			content: `Looking for people to form a study group for CS150. We can meet twice a week to go over problem sets and prepare for exams together.`,
+// 			comments: [
+// 				{
+// 					id: "2",
+// 					title: "",
+// 					content: "I'm interested! What days work best for you?",
+// 					category: "",
+// 					author: "Sarah Johnson",
+// 					createdAt: "",
+// 					reactions: {
+// 						heart: { isActive: true, count: 12 },
+// 						star: { isActive: false, count: 3 },
+// 					},
+// 					comments: [],
+// 				},
+// 			],
+// 		},
+// 		// Add more mock posts...
+// 	];
 
-	// Filter posts based on category and search
-	let filteredPosts = mockPosts;
-	if (category !== "all") {
-		filteredPosts = mockPosts.filter((post) => post.category === category);
-	}
-	if (search) {
-		filteredPosts = filteredPosts.filter(
-			(post) =>
-				post.title.toLowerCase().includes(search.toLowerCase()) ||
-				post.content.toLowerCase().includes(search.toLowerCase())
-		);
-	}
+// 	// Filter posts based on category and search
+// 	let filteredPosts = mockPosts;
+// 	if (category !== "all") {
+// 		filteredPosts = mockPosts.filter((post) => post.category === category);
+// 	}
+// 	if (search) {
+// 		filteredPosts = filteredPosts.filter(
+// 			(post) =>
+// 				post.title.toLowerCase().includes(search.toLowerCase()) ||
+// 				post.content.toLowerCase().includes(search.toLowerCase())
+// 		);
+// 	}
 
-	const postsPerPage = 5;
-	const startIndex = (page - 1) * postsPerPage;
-	const endIndex = startIndex + postsPerPage;
-	const paginatedPosts = filteredPosts.slice(startIndex, endIndex);
+// 	const postsPerPage = 5;
+// 	const startIndex = (page - 1) * postsPerPage;
+// 	const endIndex = startIndex + postsPerPage;
+// 	const paginatedPosts = filteredPosts.slice(startIndex, endIndex);
 
-	return {
-		posts: paginatedPosts,
-		pagination: {
-			currentPage: page,
-			totalPages: Math.ceil(filteredPosts.length / postsPerPage),
-			totalPosts: filteredPosts.length,
-			postsPerPage,
-		},
-	};
-};
+// 	return {
+// 		posts: paginatedPosts,
+// 		pagination: {
+// 			currentPage: page,
+// 			totalPages: Math.ceil(filteredPosts.length / postsPerPage),
+// 			totalPosts: filteredPosts.length,
+// 			postsPerPage,
+// 		},
+// 	};
+// };
 
 // Loading Skeleton Component
 const PostSkeleton = () => (
@@ -432,6 +432,128 @@ const EnhancedLeftSidebar = ({
 	);
 };
 
+// // Enhanced Right Content Area
+// const EnhancedRightContentArea = ({
+// 	selectedPost,
+// 	isMobile,
+// }: {
+// 	selectedPost: Post | null;
+// 	isMobile: boolean;
+// }) => {
+// 	const handleReaction = createReactionHandler();
+// 	// Helper  posting functionfunction
+// 	if (!selectedPost) {
+// 		return (
+// 			<div className="flex-1 flex items-center justify-center bg-inherit">
+// 				<div className="text-center text-gray-500">
+// 					<h3 className="text-lg font-medium mb-2">
+// 						Select a post to view details
+// 					</h3>
+// 					<p className="text-sm">
+// 						Click on any post from the{" "}
+// 						{isMobile ? "menu" : "left panel"} to see its content
+// 						and comments here.
+// 					</p>
+// 				</div>
+// 			</div>
+// 		);
+// 	}
+
+// 	return (
+// 		<div className="flex-1 overflow-y-auto">
+// 			<div className="p-6">
+// 				{/* Post Header */}
+// 				<div className="flex items-start space-x-4 mb-6">
+// 					<div className="w-[clamp(2.5rem,3.5rem,4.5rem)] h-[clamp(2.5rem,3.5rem,4.5rem)] bg-amber-900 rounded-full flex items-center justify-center text-white font-semibold text-[clamp(1.8rem,2.8rem,3.8rem)]">
+// 						{selectedPost.author.charAt(0)}
+// 					</div>
+// 					<div className="flex-1">
+// 						<div className="flex items-center space-x-3 mb-2">
+// 							<h3 className="font-semibold text-gray-900">
+// 								{selectedPost.author}
+// 							</h3>
+// 							<span className="text-sm text-gray-500">
+// 								{selectedPost.createdAt}
+// 							</span>
+// 						</div>
+// 						<div className="inline-block bg-amber-100 px-3 py-1 rounded-full text-sm font-medium mb-3">
+// 							{selectedPost.category}
+// 						</div>
+// 						<h2 className="text-xl font-black text-[#5D3B28] mb-4 flex items-center">
+// 							{selectedPost.title}
+// 							<span className="ml-5 text-sm text-amber-500 font-normal">
+// 								#{selectedPost.threadNumber}
+// 							</span>
+// 						</h2>
+// 					</div>
+// 				</div>
+
+// 				{/* Post Content */}
+// 				<div className="prose max-w-none mb-6">
+// 					{selectedPost.content
+// 						.split("\n")
+// 						.map((paragraph, index) => (
+// 							<p
+// 								key={index}
+// 								className="mb-3 text-gray-700 leading-relaxed"
+// 							>
+// 								{paragraph}
+// 							</p>
+// 						))}
+// 				</div>
+
+// 				{/* Reactions */}
+// 				<div className="flex items-center space-x-6 text-gray-600 mb-8 pb-6 border-b border-gray-200">
+// 					<Reactions
+// 						postId={selectedPost.id}
+// 						onReact={handleReaction}
+// 						initialStates={selectedPost.reactions}
+// 					/>
+// 				</div>
+
+// 				{/* Comments Section */}
+// 				<div>
+// 					<h4 className="font-semibold text-gray-900 mb-4">
+// 						Comments ({selectedPost.comments.length})
+// 					</h4>
+// 					{selectedPost.comments.map((comment, index) => (
+// 						<div
+// 							key={index}
+// 							className="flex items-start space-x-3 mb-6"
+// 						>
+// 							<div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center text-white font-semibold text-xs">
+// 								{comment.author.charAt(0)}
+// 							</div>
+// 							<div className="flex-1">
+// 								<div className="flex items-center space-x-2 mb-2">
+// 									<span className="font-medium text-gray-900 text-sm">
+// 										{comment.author}
+// 									</span>
+// 									<div className="flex space-x-3">
+// 										<Reactions
+// 											size={14}
+// 											commentId={comment.id}
+// 											onReact={handleReaction}
+// 											allowedReactions={{
+// 												heart: true,
+// 												star: true,
+// 											}}
+// 											initialStates={comment.reactions}
+// 										/>
+// 									</div>
+// 								</div>
+// 								<p className="text-sm text-gray-700 leading-relaxed">
+// 									{comment.content}
+// 								</p>
+// 							</div>
+// 						</div>
+// 					))}
+// 				</div>
+// 			</div>
+// 		</div>
+// 	);
+// };
+// Enhanced Right Content Area
 // Enhanced Right Content Area
 const EnhancedRightContentArea = ({
 	selectedPost,
@@ -441,7 +563,326 @@ const EnhancedRightContentArea = ({
 	isMobile: boolean;
 }) => {
 	const handleReaction = createReactionHandler();
-	// Helper  posting functionfunction
+	const [comments, setComments] = useState<Comment[]>([]);
+	const [isLoadingComments, setIsLoadingComments] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const [currentUserId, setCurrentUserId] =
+		useState<string>("current-user-id"); // Replace with real auth
+
+	// Initialize comments when post changes
+	useEffect(() => {
+		if (selectedPost) {
+			fetchComments(selectedPost.id);
+		}
+	}, [selectedPost]);
+
+	// Add new comment to post
+	const handleAddComment = async (
+		content: string,
+		isAnonymous: boolean = false
+	) => {
+		if (!selectedPost) return;
+
+		const tempId = `temp-${Date.now()}`;
+		const newComment: Comment = {
+			id: tempId,
+			postId: selectedPost.id,
+			content,
+			author: isAnonymous ? "Anonymous" : "Current User",
+			authorId: currentUserId,
+			isAnonymous,
+			isDeleted: false,
+			createdAt: "just now",
+			updatedAt: "just now",
+			reactions: {
+				heart: { count: 0, isActive: false },
+				star: { count: 0, isActive: false },
+			},
+			replies: [],
+		};
+
+		// Optimistically add comment to top
+		setComments((prev) => [newComment, ...prev]);
+		setError(null);
+
+		try {
+			const response = await fetch("/api/comments", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					postId: selectedPost.id,
+					content,
+					isAnonymous,
+				}),
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.error || "Failed to add comment");
+			}
+
+			const createdComment = await response.json();
+
+			// Replace temp comment with real one
+			setComments((prev) =>
+				prev.map((comment) =>
+					comment.id === tempId ? createdComment : comment
+				)
+			);
+
+			// Refresh all comments to get latest state
+			await fetchComments(selectedPost.id);
+		} catch (error) {
+			console.error("Failed to add comment:", error);
+			setError(
+				error instanceof Error ? error.message : "Failed to add comment"
+			);
+
+			// Remove optimistic comment on error
+			setComments((prev) =>
+				prev.filter((comment) => comment.id !== tempId)
+			);
+		}
+	};
+
+	// Add reply to comment
+	const handleAddReply = async (
+		parentCommentId: string,
+		content: string,
+		isAnonymous: boolean = false
+	) => {
+		if (!selectedPost) return;
+
+		const tempId = `temp-reply-${Date.now()}`;
+		const newReply: Comment = {
+			id: tempId,
+			postId: selectedPost.id,
+			parentCommentId,
+			content,
+			author: isAnonymous ? "Anonymous" : "Current User",
+			authorId: currentUserId,
+			isAnonymous,
+			isDeleted: false,
+			createdAt: "just now",
+			updatedAt: "just now",
+			reactions: {
+				heart: { count: 0, isActive: false },
+				star: { count: 0, isActive: false },
+			},
+		};
+
+		// Optimistically add reply
+		setComments((prev) =>
+			prev.map((comment) => {
+				if (comment.id === parentCommentId) {
+					return {
+						...comment,
+						replies: [newReply, ...(comment.replies || [])],
+					};
+				}
+				// Handle nested replies
+				if (comment.replies) {
+					return {
+						...comment,
+						replies: comment.replies.map((reply) =>
+							reply.id === parentCommentId
+								? {
+										...reply,
+										replies: [
+											newReply,
+											...(reply.replies || []),
+										],
+									}
+								: reply
+						),
+					};
+				}
+				return comment;
+			})
+		);
+
+		try {
+			const response = await fetch("/api/comments", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					postId: selectedPost.id,
+					parentCommentId,
+					content,
+					isAnonymous,
+				}),
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.error || "Failed to add reply");
+			}
+
+			// Refresh all comments from database
+			await fetchComments(selectedPost.id);
+		} catch (error) {
+			console.error("Failed to add reply:", error);
+			setError(
+				error instanceof Error ? error.message : "Failed to add reply"
+			);
+
+			// Remove optimistic reply on error
+			setComments((prev) =>
+				prev.map((comment) => {
+					if (comment.id === parentCommentId) {
+						return {
+							...comment,
+							replies:
+								comment.replies?.filter(
+									(reply) => reply.id !== tempId
+								) || [],
+						};
+					}
+					if (comment.replies) {
+						return {
+							...comment,
+							replies: comment.replies.map((reply) =>
+								reply.id === parentCommentId
+									? {
+											...reply,
+											replies:
+												reply.replies?.filter(
+													(r) => r.id !== tempId
+												) || [],
+										}
+									: reply
+							),
+						};
+					}
+					return comment;
+				})
+			);
+		}
+	};
+
+	// Edit comment
+	const handleEditComment = async (commentId: string, newContent: string) => {
+		try {
+			const response = await fetch("/api/comments", {
+				method: "PUT",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					commentId,
+					content: newContent,
+				}),
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.error || "Failed to update comment");
+			}
+
+			const updatedComment = await response.json();
+
+			// Update comment in state
+			setComments((prev) =>
+				updateCommentInTree(prev, commentId, updatedComment)
+			);
+			setError(null);
+		} catch (error) {
+			console.error("Failed to edit comment:", error);
+			setError(
+				error instanceof Error
+					? error.message
+					: "Failed to edit comment"
+			);
+		}
+	};
+
+	// Delete comment
+	const handleDeleteComment = async (commentId: string) => {
+		if (!confirm("Are you sure you want to delete this comment?")) return;
+
+		try {
+			const response = await fetch(
+				`/api/comments?commentId=${commentId}`,
+				{
+					method: "DELETE",
+				}
+			);
+
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.error || "Failed to delete comment");
+			}
+
+			// Refresh comments to show deleted state
+			if (selectedPost) {
+				await fetchComments(selectedPost.id);
+			}
+			setError(null);
+		} catch (error) {
+			console.error("Failed to delete comment:", error);
+			setError(
+				error instanceof Error
+					? error.message
+					: "Failed to delete comment"
+			);
+		}
+	};
+
+	// Helper function to update comment in nested tree
+	const updateCommentInTree = (
+		comments: Comment[],
+		commentId: string,
+		updatedComment: Comment
+	): Comment[] => {
+		return comments.map((comment) => {
+			if (comment.id === commentId) {
+				return { ...updatedComment, replies: comment.replies };
+			}
+			if (comment.replies) {
+				return {
+					...comment,
+					replies: updateCommentInTree(
+						comment.replies,
+						commentId,
+						updatedComment
+					),
+				};
+			}
+			return comment;
+		});
+	};
+
+	// Fetch comments from database
+	const fetchComments = async (postId: string) => {
+		setIsLoadingComments(true);
+		setError(null);
+
+		try {
+			const response = await fetch(`/api/comments?postId=${postId}`);
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.error || "Failed to fetch comments");
+			}
+
+			const fetchedComments = await response.json();
+			setComments(fetchedComments);
+		} catch (error) {
+			console.error("Failed to fetch comments:", error);
+			setError(
+				error instanceof Error
+					? error.message
+					: "Failed to load comments"
+			);
+			setComments([]);
+		} finally {
+			setIsLoadingComments(false);
+		}
+	};
+
 	if (!selectedPost) {
 		return (
 			<div className="flex-1 flex items-center justify-center bg-inherit">
@@ -514,40 +955,59 @@ const EnhancedRightContentArea = ({
 				{/* Comments Section */}
 				<div>
 					<h4 className="font-semibold text-gray-900 mb-4">
-						Comments ({selectedPost.comments.length})
+						Comments ({comments.length})
 					</h4>
-					{selectedPost.comments.map((comment, index) => (
-						<div
-							key={index}
-							className="flex items-start space-x-3 mb-6"
-						>
-							<div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center text-white font-semibold text-xs">
-								{comment.author.charAt(0)}
-							</div>
-							<div className="flex-1">
-								<div className="flex items-center space-x-2 mb-2">
-									<span className="font-medium text-gray-900 text-sm">
-										{comment.author}
-									</span>
-									<div className="flex space-x-3">
-										<Reactions
-											size={14}
-											commentId={comment.id}
-											onReact={handleReaction}
-											allowedReactions={{
-												heart: true,
-												star: true,
-											}}
-											initialStates={comment.reactions}
-										/>
-									</div>
-								</div>
-								<p className="text-sm text-gray-700 leading-relaxed">
-									{comment.content}
-								</p>
-							</div>
+
+					{/* Comment Input Bar */}
+					<div className="mb-6">
+						<CommentBar
+							onSubmit={handleAddComment}
+							onToggleAnonymous={() => {}}
+						/>
+					</div>
+
+					{/* Error Display */}
+					{error && (
+						<div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+							<p className="text-sm text-red-700">{error}</p>
+							<button
+								onClick={() => setError(null)}
+								className="text-xs text-red-600 hover:text-red-800 mt-1"
+							>
+								Dismiss
+							</button>
 						</div>
-					))}
+					)}
+
+					{/* Comments List */}
+					{isLoadingComments ? (
+						<div className="text-center text-gray-500 py-8">
+							<div className="inline-block w-6 h-6 border-2 border-gray-300 border-t-amber-600 rounded-full animate-spin mb-2"></div>
+							<p>Loading comments...</p>
+						</div>
+					) : comments.length === 0 ? (
+						<div className="text-center text-gray-500 py-8">
+							<MessageCircle
+								size={24}
+								className="mx-auto mb-2 text-gray-300"
+							/>
+							<p>No comments yet. Be the first to comment!</p>
+						</div>
+					) : (
+						<div className="space-y-4">
+							{comments.map((comment) => (
+								<NestedComment
+									key={comment.id}
+									comment={comment}
+									onReact={handleReaction}
+									onReply={handleAddReply}
+									onEdit={handleEditComment}
+									onDelete={handleDeleteComment}
+									currentUserId={currentUserId}
+								/>
+							))}
+						</div>
+					)}
 				</div>
 			</div>
 		</div>
@@ -746,4 +1206,287 @@ export const SearchBar = ({
 		</div>
 	);
 };
+
+import { MessageCircle, Send } from "lucide-react";
+
+/**
+ *Comment Bar Component
+ */
+
+const CommentBar = ({
+	onSubmit,
+	placeholder = "Add a comment...",
+	replyTo = null,
+	isAnonymous = false,
+	onToggleAnonymous,
+}: {
+	onSubmit: (content: string, isAnonymous: boolean) => void;
+	placeholder?: string;
+	replyTo?: string | null;
+	isAnonymous?: boolean;
+	onToggleAnonymous?: (anonymous: boolean) => void;
+}) => {
+	const [comment, setComment] = useState("");
+	const [anonymous, setAnonymous] = useState(isAnonymous);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const inputRef = useRef<HTMLInputElement>(null);
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		if (comment.trim() && !isSubmitting) {
+			setIsSubmitting(true);
+			try {
+				await onSubmit(comment.trim(), anonymous);
+				setComment("");
+			} finally {
+				setIsSubmitting(false);
+			}
+		}
+	};
+
+	const handleAnonymousToggle = (checked: boolean) => {
+		setAnonymous(checked);
+		onToggleAnonymous?.(checked);
+	};
+
+	return (
+		<form
+			onSubmit={handleSubmit}
+			className="bg-gray-50 rounded-lg p-3"
+		>
+			<div className="flex items-center space-x-3 mb-2">
+				<div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
+					{anonymous ? "?" : "U"}
+				</div>
+				<input
+					ref={inputRef}
+					type="text"
+					value={comment}
+					onChange={(e) => setComment(e.target.value)}
+					placeholder={
+						replyTo ? `Reply to ${replyTo}...` : placeholder
+					}
+					className="flex-1 bg-transparent border-none outline-none text-sm text-gray-700 placeholder-gray-500"
+					disabled={isSubmitting}
+					maxLength={1000}
+				/>
+				<button
+					type="submit"
+					disabled={!comment.trim() || isSubmitting}
+					className="text-amber-600 hover:text-amber-700 disabled:text-gray-400 disabled:cursor-not-allowed flex items-center space-x-1"
+				>
+					{isSubmitting ? (
+						<div className="w-4 h-4 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
+					) : (
+						<Send size={16} />
+					)}
+				</button>
+			</div>
+
+			{onToggleAnonymous && (
+				<div className="flex items-center space-x-2 ml-11">
+					<input
+						type="checkbox"
+						id="anonymous"
+						checked={anonymous}
+						onChange={(e) =>
+							handleAnonymousToggle(e.target.checked)
+						}
+						className="text-amber-600 focus:ring-amber-500"
+					/>
+					<label
+						htmlFor="anonymous"
+						className="text-xs text-gray-600"
+					>
+						Post anonymously
+					</label>
+				</div>
+			)}
+		</form>
+	);
+};
+
+// Nested Comment Component
+const NestedComment = ({
+	comment,
+	onReact,
+	onReply,
+	onEdit,
+	onDelete,
+	currentUserId,
+	depth = 0,
+}: {
+	comment: Comment;
+	onReact: any;
+	onReply: (commentId: string, content: string, isAnonymous: boolean) => void;
+	onEdit?: (commentId: string, content: string) => void;
+	onDelete?: (commentId: string) => void;
+	currentUserId?: string;
+	depth?: number;
+}) => {
+	const [showReplyBar, setShowReplyBar] = useState(false);
+	const [isEditing, setIsEditing] = useState(false);
+	const [editContent, setEditContent] = useState(comment.content);
+	const maxDepth = 3;
+
+	const handleReply = async (content: string, isAnonymous: boolean) => {
+		await onReply(comment.id, content, isAnonymous);
+		setShowReplyBar(false);
+	};
+
+	const handleEdit = async () => {
+		if (onEdit && editContent.trim() !== comment.content) {
+			await onEdit(comment.id, editContent.trim());
+		}
+		setIsEditing(false);
+	};
+
+	const handleCancelEdit = () => {
+		setEditContent(comment.content);
+		setIsEditing(false);
+	};
+
+	const canEdit = currentUserId === comment.authorId && !comment.isDeleted;
+	const canDelete = currentUserId === comment.authorId && !comment.isDeleted;
+
+	return (
+		<div
+			className={`${depth > 0 ? "ml-6 border-l-2 border-gray-100 pl-4" : ""} mb-4`}
+		>
+			<div className="flex items-start space-x-3">
+				<div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
+					{comment.isAnonymous ? "?" : comment.author.charAt(0)}
+				</div>
+				<div className="flex-1">
+					<div className="flex items-center space-x-2 mb-2">
+						<span className="font-medium text-gray-900 text-sm">
+							{comment.isAnonymous ? "Anonymous" : comment.author}
+						</span>
+						<span className="text-xs text-gray-500">
+							{comment.createdAt}
+						</span>
+						{comment.updatedAt !== comment.createdAt && (
+							<span className="text-xs text-gray-400">
+								(edited)
+							</span>
+						)}
+						{comment.isDeleted && (
+							<span className="text-xs text-red-500">
+								(deleted)
+							</span>
+						)}
+					</div>
+
+					{isEditing ? (
+						<div className="mb-2">
+							<textarea
+								value={editContent}
+								onChange={(e) => setEditContent(e.target.value)}
+								className="w-full p-2 text-sm border border-gray-300 rounded resize-none focus:outline-none focus:ring-2 focus:ring-amber-500"
+								rows={2}
+								maxLength={1000}
+							/>
+							<div className="flex items-center space-x-2 mt-2">
+								<button
+									onClick={handleEdit}
+									className="px-3 py-1 text-xs bg-amber-600 text-white rounded hover:bg-amber-700"
+								>
+									Save
+								</button>
+								<button
+									onClick={handleCancelEdit}
+									className="px-3 py-1 text-xs bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+								>
+									Cancel
+								</button>
+							</div>
+						</div>
+					) : (
+						<p className="text-sm text-gray-700 leading-relaxed mb-2">
+							{comment.isDeleted
+								? "[This comment has been deleted]"
+								: comment.content}
+						</p>
+					)}
+
+					{!comment.isDeleted && (
+						<div className="flex items-center space-x-4 text-gray-500">
+							<div className="flex space-x-2">
+								<Reactions
+									size={14}
+									commentId={comment.id}
+									onReact={onReact}
+									allowedReactions={{
+										heart: true,
+										star: true,
+									}}
+									initialStates={comment.reactions}
+								/>
+							</div>
+							{depth < maxDepth && (
+								<button
+									onClick={() =>
+										setShowReplyBar(!showReplyBar)
+									}
+									className="flex items-center space-x-1 text-xs hover:text-amber-600 transition-colors"
+								>
+									<MessageCircle size={12} />
+									<span>Reply</span>
+								</button>
+							)}
+							{canEdit && (
+								<button
+									onClick={() => setIsEditing(true)}
+									className="text-xs hover:text-amber-600 transition-colors"
+								>
+									Edit
+								</button>
+							)}
+							{canDelete && onDelete && (
+								<button
+									onClick={() => onDelete(comment.id)}
+									className="text-xs hover:text-red-600 transition-colors"
+								>
+									Delete
+								</button>
+							)}
+						</div>
+					)}
+				</div>
+			</div>
+
+			{showReplyBar && !comment.isDeleted && (
+				<div className="mt-3 ml-11">
+					<CommentBar
+						onSubmit={handleReply}
+						placeholder="Add a reply..."
+						replyTo={
+							comment.isAnonymous ? "Anonymous" : comment.author
+						}
+						onToggleAnonymous={(anonymous) => {}}
+					/>
+				</div>
+			)}
+
+			{/* Nested replies */}
+			{comment.replies && comment.replies.length > 0 && (
+				<div className="mt-3">
+					{comment.replies.map((reply: Comment) => (
+						<NestedComment
+							key={reply.id}
+							comment={reply}
+							onReact={onReact}
+							onReply={onReply}
+							onEdit={onEdit}
+							onDelete={onDelete}
+							currentUserId={currentUserId}
+							depth={depth + 1}
+						/>
+					))}
+				</div>
+			)}
+		</div>
+	);
+};
+
 export default EnhancedMainPostPage;

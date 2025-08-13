@@ -176,5 +176,20 @@ export interface Post {
 	createdAt: string;
 	threadNumber?: number;
 	reactions: Partial<Record<ReactionType, ReactionState>>;
-	comments: Post[];
+	comments: Comment[];
+}
+
+export interface Comment {
+	id: string;
+	postId?: string;
+	parentCommentId?: string;
+	content: string;
+	author: string;
+	authorId?: string;
+	isAnonymous?: boolean;
+	isDeleted?: boolean;
+	createdAt: string;
+	updatedAt: string;
+	reactions: Partial<Record<ReactionType, ReactionState>>;
+	replies?: Comment[];
 }
