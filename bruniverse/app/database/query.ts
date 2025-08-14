@@ -201,14 +201,14 @@ WITH toggle_reaction AS (
     WHERE user_id = $1 
     AND reaction_type = $2
     AND (
-        (post_id = $3 AND $4 IS NULL) OR 
-        (comment_id = $4 AND $3 IS NULL)
+        ($3::uuid IS NOT NULL AND post_id = $3::uuid AND comment_id IS NULL) OR 
+        ($4::uuid IS NOT NULL AND comment_id = $4::uuid AND post_id IS NULL)
     )
     RETURNING id, 'deleted' as action
 ),
 insert_reaction AS (
     INSERT INTO reactions (user_id, post_id, comment_id, reaction_type)
-    SELECT $1, $3, $4, $2
+    SELECT $1, $3::uuid, $4::uuid, $2
     WHERE NOT EXISTS (SELECT 1 FROM toggle_reaction)
     RETURNING id, 'inserted' as action
 ),
@@ -219,8 +219,8 @@ final_stats AS (
     FROM reactions 
     WHERE reaction_type = $2
     AND (
-        (post_id = $3 AND $4 IS NULL) OR 
-        (comment_id = $4 AND $3 IS NULL)
+        ($3::uuid IS NOT NULL AND post_id = $3::uuid AND comment_id IS NULL) OR 
+        ($4::uuid IS NOT NULL AND comment_id = $4::uuid AND post_id IS NULL)
     )
 )
 SELECT 
@@ -231,4 +231,3 @@ FROM final_stats fs
 LEFT JOIN toggle_reaction tr ON true
 LEFT JOIN insert_reaction ir ON true;
 `;
-

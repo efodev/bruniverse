@@ -51,7 +51,7 @@ export interface NavItem {
 	icon?: React.ReactNode;
 	children?: NavItem[];
 	style?: string;
-	action?: () => void;
+	action: () => void;
 }
 
 // Navigation component props
@@ -128,7 +128,7 @@ export interface ReactionProps {
 	size?: number;
 	postId?: string;
 	commentId?: string;
-	userId: string;
+	userId?: string;
 	onReact: (
 		reactionType: ReactionType,
 		postId?: string,
@@ -174,7 +174,30 @@ export interface Post {
 	category?: string;
 	author: string;
 	createdAt: string;
+	updatedAt?: string;
 	threadNumber?: number;
 	reactions: Partial<Record<ReactionType, ReactionState>>;
-	comments: Post[];
+	comments: Comment[];
+	viewCount?: number;
+	isPinned?: boolean;
+	commentCount: number;
+	authorId?: string;
+	isAnonymous: boolean;
+}
+
+export interface Comment {
+	id: string;
+	postId?: string;
+	parentCommentId?: string;
+	content: string;
+	author: string;
+	authorId?: string;
+	isAnonymous?: boolean;
+	isDeleted?: boolean;
+	createdAt: string;
+	updatedAt: string;
+	reactions: Partial<Record<ReactionType, ReactionState>>;
+	replies?: Comment[];
+	userId?: string;
+
 }

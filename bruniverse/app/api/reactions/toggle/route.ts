@@ -1,44 +1,49 @@
 import { NextRequest, NextResponse } from "next/server";
 import { toggleReactionQuery } from "@/app/database/query";
 import db, { DatabaseError, handleDatabaseError } from "@/app/database/db";
+import { parseUserToken } from "../../lib";
+
 interface ToggleReactionRequest {
-	userId: string;
+	userId?: string;
 	reactionType: "heart" | "share" | "star";
 	postId?: string | null;
 	commentId?: string | null;
 }
 
-export async function POST(request: NextRequest): Promise<void> {
+export async function POST(request: NextRequest): Promise<NextResponse> {
 	try {
 		const { reactionType, postId, commentId }: ToggleReactionRequest =
 			await request.json();
+		console.log(`${reactionType} ${postId} ${commentId}`);
 
-		const userId = request.headers.get("x-user-data");
+		// Get authenticated user
+		const token = request.cookies.get("token")?.value;
+		const userData = parseUserToken(token!);
+		const userId = userData?.id;
+
 		// Validation
 		if (!userId || !reactionType) {
-			NextResponse.json(
+			return NextResponse.json(
 				{
 					success: false,
 					message: "userId and reactionType are required",
 				},
 				{ status: 400 }
 			);
-			return;
 		}
 
 		if (!postId && !commentId) {
-			NextResponse.json(
+			return NextResponse.json(
 				{
 					success: false,
 					message: "Either postId or commentId must be provided",
 				},
 				{ status: 400 }
 			);
-			return;
 		}
 
 		if (postId && commentId) {
-			NextResponse.json(
+			return NextResponse.json(
 				{
 					success: false,
 					message:
@@ -46,44 +51,39 @@ export async function POST(request: NextRequest): Promise<void> {
 				},
 				{ status: 400 }
 			);
-			return;
 		}
 
 		if (!["heart", "share", "star"].includes(reactionType)) {
-			NextResponse.json(
+			return NextResponse.json(
 				{
 					success: false,
 					message: "Invalid reaction type",
 				},
 				{ status: 400 }
 			);
-			return;
 		}
 
-		const result = await db.query(toggleReactionQuery, [
+		// Prepare parameters with explicit null handling
+		const params = [
 			userId,
 			reactionType,
-			postId,
-			commentId,
-		]);
-		const data = result.rows[0];
-		if (data || data.length === 0) {
-			NextResponse.json(
-				{
-					success: false,
-					message: "Failed to toggle reaction",
-				},
-				{ status: 500 }
-			);
-			return;
-		}
+			postId || null,
+			commentId || null,
+		];
+
+		const data = await toggleReaction(
+			userId,
+			reactionType,
+			postId!,
+			commentId!
+		);
 
 		const { count, is_active, action } = data;
 
-		NextResponse.json(
+		return NextResponse.json(
 			{
 				success: true,
-				count: parseInt(count),
+				count: count,
 				is_active,
 				action,
 				message: `Reaction ${action === "inserted" ? "added" : action === "deleted" ? "removed" : "unchanged"}`,
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest): Promise<void> {
 		);
 	} catch (error) {
 		console.error("Toggle reaction error:", error);
-		NextResponse.json(
+		return NextResponse.json(
 			{
 				success: false,
 				message: "Internal server error",
@@ -102,48 +102,93 @@ export async function POST(request: NextRequest): Promise<void> {
 	}
 }
 
-// // Alternative query function for getting initial reaction states
-// export const getReactionStates = async (
-// 	userId: string,
-// 	targetId: string,
-// 	targetType: "post" | "comment"
-// ): Promise<Record<string, { isActive: boolean; count: number }>> => {
-// 	const query = `
-//     SELECT
-//       reaction_type,
-//       COUNT(*) as total_count,
-//       COUNT(CASE WHEN user_id = $1 THEN 1 END) > 0 as is_active
-//     FROM reactions
-//     WHERE ${targetType === "post" ? "post_id" : "comment_id"} = $2
-//     GROUP BY reaction_type;
-//   `;
+// More reliable approach - use separate queries in sequence
+export async function toggleReaction(
+	userId: string,
+	reactionType: string,
+	postId: string | null,
+	commentId: string | null
+) {
+	try {
+		await db.query("BEGIN");
 
-// 	const db = getDatabase();
-// 	const result = await db.query({
-// 		text: query,
-// 		values: [userId, targetId],
-// 	});
+		// 1. Check if reaction exists
+		const existingQuery = `
+            SELECT id FROM reactions 
+            WHERE user_id = $1 AND reaction_type = $2
+            AND (
+                ($3::uuid IS NOT NULL AND post_id = $3::uuid AND comment_id IS NULL) OR 
+                ($4::uuid IS NOT NULL AND comment_id = $4::uuid AND post_id IS NULL)
+            )
+        `;
 
-// 	if (!result.success) {
-// 		throw new Error("Failed to fetch reaction states");
-// 	}
+		const existing = await db.query(existingQuery, [
+			userId,
+			reactionType,
+			postId,
+			commentId,
+		]);
 
-// 	// Transform result into the expected format
-// 	const states: Record<string, { isActive: boolean; count: number }> = {};
+		let action: string;
 
-// 	result.data?.forEach((row: any) => {
-// 		states[row.reaction_type] = {
-// 			isActive: row.is_active,
-// 			count: parseInt(row.total_count),
-// 		};
-// 	});
+		if (existing.rows.length > 0) {
+			// 2a. Delete existing reaction
+			await db.query(
+				`
+                DELETE FROM reactions 
+                WHERE user_id = $1 AND reaction_type = $2
+                AND (
+                    ($3::uuid IS NOT NULL AND post_id = $3::uuid AND comment_id IS NULL) OR 
+                    ($4::uuid IS NOT NULL AND comment_id = $4::uuid AND post_id IS NULL)
+                )
+            `,
+				[userId, reactionType, postId, commentId]
+			);
+			action = "deleted";
+		} else {
+			// 2b. Insert new reaction
+			await db.query(
+				`
+                INSERT INTO reactions (user_id, post_id, comment_id, reaction_type)
+                VALUES ($1, $2, $3, $4)
+            `,
+				[userId, postId, commentId, reactionType]
+			);
+			action = "inserted";
+		}
 
-// 	// Ensure all reaction types have a state
-// 	["heart", "share", "star"].forEach((reactionType) => {
-// 		if (!states[reactionType]) {
-// 			states[reactionType] = { isActive: false, count: 0 };
-// 		}
-// 	});
+		// 3. Get final stats
+		const statsQuery = `
+            SELECT 
+                COUNT(*) as total_count,
+                BOOL_OR(user_id = $1) as is_active
+            FROM reactions 
+            WHERE reaction_type = $2
+            AND (
+                ($3::uuid IS NOT NULL AND post_id = $3::uuid AND comment_id IS NULL) OR 
+                ($4::uuid IS NOT NULL AND comment_id = $4::uuid AND post_id IS NULL)
+            )
+        `;
 
-// 	return states;
-// };
+		const statsResult = await db.query(statsQuery, [
+			userId,
+			reactionType,
+			postId,
+			commentId,
+		]);
+		const stats = statsResult.rows[0];
+
+		await db.query("COMMIT");
+
+		return {
+			count: parseInt(stats.total_count),
+			is_active: stats.is_active,
+			action,
+		};
+	} catch (error) {
+		await db.query("ROLLBACK");
+		throw error;
+	} finally {
+		db.close();
+	}
+}

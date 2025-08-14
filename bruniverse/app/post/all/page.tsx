@@ -18,10 +18,7 @@ const MainPostPage = () => {
 	const [createPost, setCreatePost] = useState<boolean>(false);
 	const [categories, setCategories] = useState<Category[]>([]);
 
-	location.replace("/post");
-	useLayoutEffect(() => {
-		location.replace("/post");
-	});
+	useLayoutEffect(() => {});
 	useEffect(() => {
 		fetchCategories().then((res) => {
 			setCategories(res);

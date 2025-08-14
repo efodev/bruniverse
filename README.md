@@ -20,6 +20,7 @@
 -   instead of store user-data via session storage, it better to keep the sessions token for that.
 -   Make good use of middleware just as in the edu-platform.
 -   Remove the user-data header and use the session token.
+- Redirect User to post endpoint if session is active.
 
 ## Drafts & Formatting
 
@@ -39,5 +40,6 @@
 ## Frontend
 
 -   Wierd Display if category is not loaded. Look into that. I'm thinking it's will have to do with min width.
+- Find a way to keep the user info at session storage active
 
 *   I am also thinking to rebuild the entire frontend using size relative to the viewport width first, while setting the window with to 100% and other stuff relative. Also fonts will be rem units. -- Basically follow Melody's design to the Tee.

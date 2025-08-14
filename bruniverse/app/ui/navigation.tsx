@@ -21,18 +21,7 @@ import Logo from "./util/images";
 import logoImage from "@/public/bear_logo2.svg";
 import { inter } from "./fonts";
 
-const items: NavItem[] = [
-	{
-		label: "About",
-		link: "/about",
-		icon: <User className="w-4 h-4" />,
-	},
-	{
-		label: "Sign Up",
-		link: "/signup",
-		icon: <Settings className="w-4 h-4" />,
-	},
-];
+const items: NavItem[] = [];
 
 const bearLogo = (
 	<Logo
@@ -449,7 +438,7 @@ interface PostNavigationProps {
 }
 
 /**
- * Second Navigation bar with improved positioning and 64px height
+ * Competition-grade responsive navigation with fluid scaling and perfect proportions
  */
 export const PostNavigation = ({
 	logo = { show: true, src: "" },
@@ -575,7 +564,7 @@ export const PostNavigation = ({
 					<button
 						key={index}
 						onClick={() => {
-							item.action && item.action();
+							item.action();
 							setIsMenuOpen(false);
 						}}
 						className="
@@ -600,7 +589,8 @@ export const PostNavigation = ({
 					className="
 					absolute left-[clamp(0.75rem,2vw,1rem)] top-1/2 transform -translate-y-1/2 
 					w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)] 
-					text-amber-600/70 transition-colors duration-300"
+					text-amber-600/70 transition-colors duration-300
+				"
 				/>
 				<input
 					type="text"
