@@ -23,9 +23,20 @@ import { ToastMessage } from "../util/toast";
 
 // Post Creation Modal Component
 interface PostModalProps {
+	onPost?: (post: any) => Promise<{ success: boolean; message: string }>;
 	onClose: () => void;
+	onUpdatePost?: (
+		post: any
+	) => Promise<{ success: boolean; message?: string }>;
 	categories?: Category[];
 	className?: string;
+	editingPost?: {
+		id: string;
+		title: string;
+		content: string;
+		category: { id: string; name: string };
+		isAnonymous: boolean;
+	} | null;
 }
 // Post status interface
 interface PostStatus {
@@ -40,9 +51,12 @@ interface DraftContext {
 }
 
 export const PostCreationModal = ({
+	onPost,
+	onUpdatePost,
 	onClose,
 	categories = [],
 	className = "",
+	editingPost = null,
 }: PostModalProps) => {
 	const [title, setTitle] = useState("");
 	const [selectedCategory, setSelectedCategory] = useState<{
@@ -54,17 +68,39 @@ export const PostCreationModal = ({
 	const [addPostStatus, setAddPostStatus] = useState<PostStatus | null>();
 	const draftContextRef = useRef<DraftContext>(null);
 
-	// Use the pagination hook
+	// Determine if we're in edit mode
+	const isEditMode = Boolean(editingPost);
+
+	// Use the pagination hook only if not in edit mode
+	const draftHook = useDraftPagination(10);
 	const {
 		addDraft,
 		updateDraft: updateDraftInList,
 		removeDraft,
-	} = useDraftPagination(10);
+	} = isEditMode
+		? { addDraft: () => {}, updateDraft: () => {}, removeDraft: () => {} }
+		: draftHook;
+
+	// Populate form fields when editingPost is provided
+	useEffect(() => {
+		if (editingPost) {
+			setTitle(editingPost.title);
+			setContent(editingPost.content);
+			setSelectedCategory(editingPost.category);
+			setIsAnonymous(editingPost.isAnonymous);
+
+			// Clear draft context in edit mode
+			draftContextRef.current = null;
+		} else {
+			// Clear form when switching back to create mode
+			clearForm();
+		}
+	}, [editingPost]);
 
 	/**
-	 *  Helper method to handle creation of new post.
+	 *  Helper method to handle creation of new post or updating existing post.
 	 */
-	const handleNewPost = async () => {
+	const handleSubmitPost = async () => {
 		const post = {
 			title,
 			categoryId: selectedCategory.id,
@@ -72,30 +108,67 @@ export const PostCreationModal = ({
 			isAnonymous,
 		};
 
-		const context = draftContextRef.current;
-		const result = await createPost(post);
+		if (isEditMode && editingPost && onUpdatePost) {
+			// Update existing post
+			const postWithId = { ...post, id: editingPost.id };
+			const result = await onUpdatePost(postWithId);
 
-		if (result.success) {
-			setAddPostStatus({ success: true, message: "Posted!" });
+			if (result.success) {
+				setAddPostStatus({
+					success: true,
+					message: "Post updated successfully!",
+				});
+				// Clear form after successful update
+				setTimeout(() => {
+					clearForm();
+					onClose();
+				}, 1500);
+			} else {
+				setAddPostStatus({
+					success: false,
+					message: result.message || "Failed to update post",
+				});
+			}
+		} else {
+			// Create new post
+			const context = draftContextRef.current;
+			const result = await onPost!(post);
 
-			// If posted from a draft, remove it from the list
-			if (context?.id && context?.isFromDraft) {
-				removeDraft(context.id);
+			if (result.success) {
+				setAddPostStatus({ success: true, message: "Posted!" });
+
+				// If posted from a draft, remove it from the list
+				if (context?.id && context?.isFromDraft) {
+					removeDraft(context.id);
+				}
+
+				// Clear form
+				clearForm();
+				setTimeout(() => onClose(), 1500);
+			} else {
+				setAddPostStatus({
+					success: false,
+					message: result.message || "Failed to create post",
+				});
 			}
 
-			// Clear form
-			clearForm();
-		} else {
-			setAddPostStatus({ success: false, message: result.message });
+			draftContextRef.current = null;
 		}
-
-		draftContextRef.current = null;
 	};
 
 	/**
 	 * Helper method to handle saving of drafted post.
+	 * Disabled in edit mode.
 	 */
 	const handleSave = async () => {
+		if (isEditMode) {
+			setAddPostStatus({
+				success: false,
+				message: "Draft saving is disabled in edit mode",
+			});
+			return;
+		}
+
 		const post = {
 			title,
 			categoryId: selectedCategory.id,
@@ -129,9 +202,18 @@ export const PostCreationModal = ({
 
 	/**
 	 * Helper method populates post fields with draft content.
+	 * Disabled in edit mode.
 	 * @param draft
 	 */
 	const handleDraftSelect = (draft: Draft) => {
+		if (isEditMode) {
+			setAddPostStatus({
+				success: false,
+				message: "Draft selection is disabled in edit mode",
+			});
+			return;
+		}
+
 		// Set ref with complete context
 		draftContextRef.current = {
 			id: draft.id,
@@ -157,6 +239,12 @@ export const PostCreationModal = ({
 		draftContextRef.current = null;
 	};
 
+	// Determine modal title based on mode
+	const modalTitle = isEditMode ? "Edit Post" : "Create A New Post";
+
+	// Determine submit button text
+	const submitButtonText = isEditMode ? "Update Post" : "Post";
+
 	return (
 		<div
 			className={`absolute top-[9%] left-1/2 transform -translate-x-1/2 bg-[#FEF4DC] rounded-[2.8vw] w-[90%] h-[86%]
@@ -170,7 +258,7 @@ export const PostCreationModal = ({
 			)}
 			<div className="flex h-full w-full">
 				{/* Close button */}
-				<div className="absolute right-5 top-3 z-10">
+				<div className="absolute right-5 top-3 z-100">
 					<button
 						onClick={onClose}
 						className="w-6 h-6 rounded-full border flex items-center justify-center text-gray-500 hover:text-red-700 transition-colors"
@@ -183,8 +271,14 @@ export const PostCreationModal = ({
 				<div className="flex-1 p-6 pr-0 flex flex-col">
 					<div className="mb-6">
 						<h1 className="text-3xl font-bold text-[#B10F0F] tracking-normal pb-4 mt-3">
-							Create A New Post
+							{modalTitle}
 						</h1>
+						{isEditMode && (
+							<p className="text-sm text-gray-600 -mt-2">
+								Editing existing post • Draft features are
+								disabled
+							</p>
+						)}
 					</div>
 
 					<div className="flex-1 space-y-5 overflow-y-auto">
@@ -263,38 +357,75 @@ export const PostCreationModal = ({
 					</div>
 				</div>
 
-				{/* Drafts Sidebar with pagination */}
-				<div className="w-80 flex flex-col border-l border-gray-200 bg-[#FEF4DC] rounded-r-[2.8vw] overflow-hidden">
-					{/* Drafts Section */}
-					<div className="flex-1 p-4 min-h-0">
-						<EnhancedDraftsSidebar
-							onDraftClick={handleDraftSelect}
-							pageSize={8} // Smaller page size for sidebar
-						/>
-					</div>
+				{/* Drafts Sidebar with pagination - Hidden in edit mode */}
+				{!isEditMode && (
+					<div className="w-80 flex flex-col border-l border-gray-200 bg-[#FEF4DC] rounded-r-[2.8vw] overflow-hidden">
+						{/* Drafts Section */}
+						<div className="flex-1 p-4 min-h-0">
+							<EnhancedDraftsSidebar
+								onDraftClick={handleDraftSelect}
+								pageSize={8} // Smaller page size for sidebar
+							/>
+						</div>
 
-					{/* Action Buttons - Always visible */}
-					<div className="p-4 border-t border-gray-200 bg-[#FEF4DC]">
-						<div className="flex space-x-3">
-							<FlexButton
-								color="bruniverse"
-								action={handleSave}
-								width={"auto"}
-								className="flex-1 px-4 py-3 rounded-lg font-medium text-center"
-							>
-								<strong>Save Draft</strong>
-							</FlexButton>
-							<FlexButton
-								color="danger"
-								width={"auto"}
-								action={handleNewPost}
-								className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium text-center"
-							>
-								<strong>Post</strong>
-							</FlexButton>
+						{/* Action Buttons - Always visible */}
+						<div className="p-4 border-t border-gray-200 bg-[#FEF4DC]">
+							<div className="flex space-x-3">
+								<FlexButton
+									color="bruniverse"
+									action={handleSave}
+									width={"auto"}
+									className="flex-1 px-4 py-3 rounded-lg font-medium text-center"
+								>
+									<strong>Save Draft</strong>
+								</FlexButton>
+								<FlexButton
+									color="danger"
+									width={"auto"}
+									action={handleSubmitPost}
+									className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium text-center"
+								>
+									<strong>{submitButtonText}</strong>
+								</FlexButton>
+							</div>
 						</div>
 					</div>
-				</div>
+				)}
+
+				{/* Edit Mode Action Buttons - Only shown in edit mode */}
+				{isEditMode && (
+					<div className="w-80 flex flex-col justify-end border-l border-gray-200 bg-[#FEF4DC] rounded-r-[2.8vw]">
+						<div className="p-4">
+							<div className="bg-gray-50 rounded-lg p-4 mb-4">
+								<h3 className="font-semibold text-gray-700 mb-2">
+									Edit Mode
+								</h3>
+								<p className="text-sm text-gray-600">
+									You are currently editing an existing post.
+									Draft features are disabled during editing.
+								</p>
+							</div>
+							<div className="flex space-x-3">
+								<FlexButton
+									color="secondary"
+									action={onClose}
+									width={"auto"}
+									className="flex-1 px-4 py-3 rounded-lg font-medium text-center"
+								>
+									<strong>Cancel</strong>
+								</FlexButton>
+								<FlexButton
+									color="danger"
+									width={"auto"}
+									action={handleSubmitPost}
+									className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium text-center"
+								>
+									<strong>{submitButtonText}</strong>
+								</FlexButton>
+							</div>
+						</div>
+					</div>
+				)}
 			</div>
 		</div>
 	);

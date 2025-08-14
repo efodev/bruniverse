@@ -7,12 +7,21 @@ import {
 	X,
 	ArrowLeft,
 	ArrowRight,
+	MoreHorizontal,
+	Edit2,
+	Trash2,
+	AlertTriangle,
 } from "lucide-react";
 import { Reactions } from "../util/reactions";
 import { createReactionHandler } from "@/app/lib/reactions";
 import { PostCreationModal } from "./create";
 import { Post, Comment } from "../definitions";
-import { fetchPosts } from "@/app/lib/post/util";
+import {
+	createPost,
+	deletePost,
+	fetchPosts,
+	updatePost,
+} from "@/app/lib/post/util";
 import { fetchCategories } from "@/app/post/all/page";
 import { PostNavigation } from "../navigation";
 
@@ -432,150 +441,48 @@ const EnhancedLeftSidebar = ({
 	);
 };
 
-// // Enhanced Right Content Area
-// const EnhancedRightContentArea = ({
-// 	selectedPost,
-// 	isMobile,
-// }: {
-// 	selectedPost: Post | null;
-// 	isMobile: boolean;
-// }) => {
-// 	const handleReaction = createReactionHandler();
-// 	// Helper  posting functionfunction
-// 	if (!selectedPost) {
-// 		return (
-// 			<div className="flex-1 flex items-center justify-center bg-inherit">
-// 				<div className="text-center text-gray-500">
-// 					<h3 className="text-lg font-medium mb-2">
-// 						Select a post to view details
-// 					</h3>
-// 					<p className="text-sm">
-// 						Click on any post from the{" "}
-// 						{isMobile ? "menu" : "left panel"} to see its content
-// 						and comments here.
-// 					</p>
-// 				</div>
-// 			</div>
-// 		);
-// 	}
+//Helper function to getUserData
+function getUserId() {
+	try {
+		const userData = JSON.parse(sessionStorage.getItem("user") || "");
+		if (userData) {
+			return userData.id || "";
+		}
+	} catch (error) {
+		return "";
+	}
+}
 
-// 	return (
-// 		<div className="flex-1 overflow-y-auto">
-// 			<div className="p-6">
-// 				{/* Post Header */}
-// 				<div className="flex items-start space-x-4 mb-6">
-// 					<div className="w-[clamp(2.5rem,3.5rem,4.5rem)] h-[clamp(2.5rem,3.5rem,4.5rem)] bg-amber-900 rounded-full flex items-center justify-center text-white font-semibold text-[clamp(1.8rem,2.8rem,3.8rem)]">
-// 						{selectedPost.author.charAt(0)}
-// 					</div>
-// 					<div className="flex-1">
-// 						<div className="flex items-center space-x-3 mb-2">
-// 							<h3 className="font-semibold text-gray-900">
-// 								{selectedPost.author}
-// 							</h3>
-// 							<span className="text-sm text-gray-500">
-// 								{selectedPost.createdAt}
-// 							</span>
-// 						</div>
-// 						<div className="inline-block bg-amber-100 px-3 py-1 rounded-full text-sm font-medium mb-3">
-// 							{selectedPost.category}
-// 						</div>
-// 						<h2 className="text-xl font-black text-[#5D3B28] mb-4 flex items-center">
-// 							{selectedPost.title}
-// 							<span className="ml-5 text-sm text-amber-500 font-normal">
-// 								#{selectedPost.threadNumber}
-// 							</span>
-// 						</h2>
-// 					</div>
-// 				</div>
-
-// 				{/* Post Content */}
-// 				<div className="prose max-w-none mb-6">
-// 					{selectedPost.content
-// 						.split("\n")
-// 						.map((paragraph, index) => (
-// 							<p
-// 								key={index}
-// 								className="mb-3 text-gray-700 leading-relaxed"
-// 							>
-// 								{paragraph}
-// 							</p>
-// 						))}
-// 				</div>
-
-// 				{/* Reactions */}
-// 				<div className="flex items-center space-x-6 text-gray-600 mb-8 pb-6 border-b border-gray-200">
-// 					<Reactions
-// 						postId={selectedPost.id}
-// 						onReact={handleReaction}
-// 						initialStates={selectedPost.reactions}
-// 					/>
-// 				</div>
-
-// 				{/* Comments Section */}
-// 				<div>
-// 					<h4 className="font-semibold text-gray-900 mb-4">
-// 						Comments ({selectedPost.comments.length})
-// 					</h4>
-// 					{selectedPost.comments.map((comment, index) => (
-// 						<div
-// 							key={index}
-// 							className="flex items-start space-x-3 mb-6"
-// 						>
-// 							<div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center text-white font-semibold text-xs">
-// 								{comment.author.charAt(0)}
-// 							</div>
-// 							<div className="flex-1">
-// 								<div className="flex items-center space-x-2 mb-2">
-// 									<span className="font-medium text-gray-900 text-sm">
-// 										{comment.author}
-// 									</span>
-// 									<div className="flex space-x-3">
-// 										<Reactions
-// 											size={14}
-// 											commentId={comment.id}
-// 											onReact={handleReaction}
-// 											allowedReactions={{
-// 												heart: true,
-// 												star: true,
-// 											}}
-// 											initialStates={comment.reactions}
-// 										/>
-// 									</div>
-// 								</div>
-// 								<p className="text-sm text-gray-700 leading-relaxed">
-// 									{comment.content}
-// 								</p>
-// 							</div>
-// 						</div>
-// 					))}
-// 				</div>
-// 			</div>
-// 		</div>
-// 	);
-// };
-// Enhanced Right Content Area
 // Enhanced Right Content Area
 const EnhancedRightContentArea = ({
 	selectedPost,
+	categories,
 	isMobile,
+	onUpdatePost,
+	onDeletePost,
 }: {
 	selectedPost: Post | null;
+	categories: Category[];
 	isMobile: boolean;
+	onUpdatePost: PostsComponentProps["onUpdatePost"];
+	onDeletePost: PostsComponentProps["onDeletePost"];
 }) => {
 	const handleReaction = createReactionHandler();
 	const [comments, setComments] = useState<Comment[]>([]);
 	const [isLoadingComments, setIsLoadingComments] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const [currentUserId, setCurrentUserId] =
-		useState<string>("current-user-id"); // Replace with real auth
+	const [currentUserId, setCurrentUserId] = useState<string>(getUserId()); // Replace with real auth
 
 	// Initialize comments when post changes
 	useEffect(() => {
 		if (selectedPost) {
 			fetchComments(selectedPost.id);
+			console.log("posts: ", selectedPost);
 		}
 	}, [selectedPost]);
-
+	if (comments) {
+		console.log("comment", comments);
+	}
 	// Add new comment to post
 	const handleAddComment = async (
 		content: string,
@@ -904,7 +811,7 @@ const EnhancedRightContentArea = ({
 		<div className="flex-1 overflow-y-auto">
 			<div className="p-6">
 				{/* Post Header */}
-				<div className="flex items-start space-x-4 mb-6">
+				{/* <div className="flex items-start space-x-4 mb-6">
 					<div className="w-[clamp(2.5rem,3.5rem,4.5rem)] h-[clamp(2.5rem,3.5rem,4.5rem)] bg-amber-900 rounded-full flex items-center justify-center text-white font-semibold text-[clamp(1.8rem,2.8rem,3.8rem)]">
 						{selectedPost.author.charAt(0)}
 					</div>
@@ -927,10 +834,9 @@ const EnhancedRightContentArea = ({
 							</span>
 						</h2>
 					</div>
-				</div>
-
+				</div> */}
 				{/* Post Content */}
-				<div className="prose max-w-none mb-6">
+				{/* <div className="prose max-w-none mb-6">
 					{selectedPost.content
 						.split("\n")
 						.map((paragraph, index) => (
@@ -941,8 +847,14 @@ const EnhancedRightContentArea = ({
 								{paragraph}
 							</p>
 						))}
-				</div>
-
+				</div> */}
+				<PostsComponent
+					selectedPost={selectedPost!}
+					currentUserId={currentUserId}
+					onDeletePost={onDeletePost}
+					onUpdatePost={onUpdatePost}
+					categories={categories}
+				/>
 				{/* Reactions */}
 				<div className="flex items-center space-x-6 text-gray-600 mb-8 pb-6 border-b border-gray-200">
 					<Reactions
@@ -951,7 +863,6 @@ const EnhancedRightContentArea = ({
 						initialStates={selectedPost.reactions}
 					/>
 				</div>
-
 				{/* Comments Section */}
 				<div>
 					<h4 className="font-semibold text-gray-900 mb-4">
@@ -1018,7 +929,8 @@ const EnhancedRightContentArea = ({
 const EnhancedMainPostPage = () => {
 	const [activeCategory, setActiveCategory] = useState<string>("all");
 	const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-	const [createPost, setCreatePost] = useState<boolean>(false);
+	const [showCreatePostModal, setShowCreatePostModal] =
+		useState<boolean>(false);
 	const [categories, setCategories] = useState<Category[]>([]);
 	const [posts, setPosts] = useState<Post[]>([]);
 	const [pagination, setPagination] = useState<PaginationInfo>({
@@ -1057,11 +969,12 @@ const EnhancedMainPostPage = () => {
 			setIsLoading(true);
 			try {
 				console.log("Pagination, ", JSON.stringify(Pagination));
-				const result = await fetchPosts(
-					pagination.currentPage,
-					activeCategory,
-					searchQuery
-				);
+				const result = await fetchPosts({
+					page: pagination.currentPage,
+					category: activeCategory,
+					search: searchQuery,
+					limit: 10,
+				});
 				// if (!result.success) {
 				// 	location.reload();
 				// }
@@ -1096,6 +1009,94 @@ const EnhancedMainPostPage = () => {
 		setSelectedPost(null);
 	}, []);
 
+	// Handle post
+	// Handle creating a new post
+	const handleCreatePost = async (postData: any) => {
+		try {
+			const result = await createPost(postData);
+
+			if (result.success) {
+				// Add new post to the top of the list
+				setPosts((prevPosts) => [result.data, ...prevPosts]);
+
+				// Update pagination count
+				setPagination((prev) => ({
+					...prev,
+					totalPosts: prev.totalPosts + 1,
+				}));
+			}
+
+			return result;
+		} catch (error) {
+			return {
+				success: false,
+				message: "Failed to create post",
+			};
+		}
+	};
+
+	// Handle updating a post
+	const handleUpdatePost = async (postData: any) => {
+		try {
+			const result = await updatePost(postData);
+
+			if (result.success) {
+				// Update post in the list
+				setPosts((prevPosts) =>
+					prevPosts.map((post) =>
+						post.id === postData.id
+							? { ...post, ...result.data }
+							: post
+					)
+				);
+				return {
+					success: true,
+					message: result.message,
+				};
+			}
+
+			return {
+				success: false,
+				message: "Failed to update post",
+			};
+		} catch (error) {
+			return {
+				success: false,
+				message: "Failed to update post",
+			};
+		}
+	};
+
+	// Handle deleting a post
+	const handleDeletePost = async (postId: string) => {
+		try {
+			const result = await deletePost(postId);
+
+			if (result.success) {
+				// Remove post from the list
+				setPosts((prevPosts) =>
+					prevPosts.filter((post) => post.id !== postId)
+				);
+
+				// Update pagination count
+				setPagination((prev) => ({
+					...prev,
+					totalPosts: prev.totalPosts - 1,
+				}));
+
+				// Clear selected post if it was deleted
+				if (selectedPost?.id === postId) {
+					setSelectedPost(null);
+				}
+			} else {
+				throw new Error(result.message);
+			}
+		} catch (error) {
+			console.error("Failed to delete post:", error);
+			throw error;
+		}
+	};
+
 	const topLevelItems: LeftSideBarTopLevelItemsProps[] = [
 		{ id: "all", name: "All", hasDropdown: false },
 		{
@@ -1127,7 +1128,7 @@ const EnhancedMainPostPage = () => {
 
 	return (
 		<div
-			className={`min-h-screen ${createPost ? "bg-[#ADA89B]" : "bg-[#FEF4DC]"}`}
+			className={`min-h-screen ${showCreatePostModal ? "bg-[#ADA89B]" : "bg-[#FEF4DC]"}`}
 		>
 			<header className="h-[70px]">
 				<PostNavigation />
@@ -1150,20 +1151,24 @@ const EnhancedMainPostPage = () => {
 						// searchBar={/*{ show: true, onSearch: handleSearch }*/}
 						createPostButton={{
 							show: true,
-							onClick: () => setCreatePost(true),
+							onClick: () => setShowCreatePostModal(true),
 						}}
 					/>
 
 					<EnhancedRightContentArea
 						selectedPost={selectedPost}
+						categories={categories}
 						isMobile={isMobile}
+						onDeletePost={handleDeletePost}
+						onUpdatePost={handleUpdatePost}
 					/>
 				</div>
 				{/* Create Post Modal */}
-				{createPost && (
+				{showCreatePostModal && (
 					<PostCreationModal
-						onClose={() => setCreatePost(false)}
+						onClose={() => setShowCreatePostModal(false)}
 						categories={categories}
+						onPost={handleCreatePost}
 					/>
 				)}
 			</main>
@@ -1486,6 +1491,324 @@ const NestedComment = ({
 				</div>
 			)}
 		</div>
+	);
+};
+
+interface PostsComponentProps {
+	selectedPost: Post | null;
+	categories: Category[];
+	currentUserId: string;
+	onUpdatePost: (
+		postId: string
+	) => Promise<{ success: boolean; message: string }>;
+	onDeletePost: (postData: any) => Promise<void>;
+}
+
+export const PostsComponent: React.FC<PostsComponentProps> = ({
+	selectedPost,
+	categories,
+	currentUserId,
+	onDeletePost,
+	onUpdatePost,
+}) => {
+	const [showCreateModal, setShowCreateModal] = useState(false);
+	const [editingPost, setEditingPost] = useState<any>(null);
+	const [post, setPost] = useState(selectedPost);
+
+	// Handle updating a post
+	const handleUpdatePost = async (postData: any) => {
+		try {
+			setPost((prev) => prev && { ...selectedPost, ...post! });
+			const result = onUpdatePost(postData);
+			setEditingPost(null);
+			return result;
+		} catch (error) {
+			return {
+				success: false,
+				message: "Failed to update post",
+			};
+		}
+	};
+
+	// Handle deleting a post
+	const handleDeletePost = async (postId: string) => {
+		try {
+			setEditingPost(null);
+			onDeletePost(postId);
+			setPost(null);
+		} catch (error) {
+			console.error("Failed to delete post:", error);
+		}
+	};
+
+	// Handle opening create modal
+	const handleOpenCreateModal = () => {
+		setEditingPost(null);
+		setShowCreateModal(true);
+	};
+
+	// Handle opening edit modal
+	const handleEditPost = (post: any) => {
+		setEditingPost(post);
+		setShowCreateModal(true);
+	};
+
+	// Handle closing modal
+	const handleCloseModal = () => {
+		setShowCreateModal(false);
+		setEditingPost(null);
+	};
+
+	if (!post) {
+		return null;
+	}
+
+	return (
+		<>
+			{/* Posts List Section */}
+			<div className="flex-1 flex flex-col">
+				{/*Post Header*/}
+				<div className="flex items-start space-x-4 mb-6">
+					<div className="w-[clamp(2.5rem,3.5rem,4.5rem)] h-[clamp(2.5rem,3.5rem,4.5rem)] bg-amber-900 rounded-full flex items-center justify-center text-white font-semibold text-[clamp(1.8rem,2.8rem,3.8rem)]">
+						{post.author.charAt(0)}
+					</div>
+					<div className="flex-1">
+						<div className="flex items-center space-x-3 mb-2">
+							<h3 className="font-semibold text-gray-900">
+								{post.author}
+							</h3>
+							<span className="text-sm text-gray-500">
+								{post.createdAt}
+							</span>
+						</div>
+						<div className="inline-block bg-amber-100 px-3 py-1 rounded-full text-sm font-medium mb-3">
+							{post.category}
+						</div>
+						<h2 className="text-xl font-black text-[#5D3B28] mb-4 flex items-center">
+							{post.title}
+							<span className="ml-5 text-sm text-amber-500 font-normal">
+								#{post.threadNumber}
+							</span>
+						</h2>
+					</div>
+				</div>
+				{/* Post Content */}
+				<div className="prose max-w-none mb-6">
+					{post.content.split("\n").map((paragraph, index) => (
+						<p
+							key={index}
+							className="mb-3 text-gray-700 leading-relaxed"
+						>
+							{paragraph}
+						</p>
+					))}
+				</div>
+				{/* Post Actions */}
+				<PostActions
+					post={post}
+					currentUserId={currentUserId}
+					onEdit={handleEditPost}
+					onDelete={handleDeletePost}
+					className="ml-2"
+				/>
+			</div>
+
+			{/* Post Creation/Edit Modal */}
+			{showCreateModal && (
+				<PostCreationModal
+					onClose={handleCloseModal}
+					onUpdatePost={handleUpdatePost}
+					categories={categories}
+					editingPost={editingPost}
+				/>
+			)}
+		</>
+	);
+};
+
+interface PostActionsProps {
+	post: Post;
+	currentUserId: string | null;
+	onEdit: (post: any) => void;
+	onDelete: (postId: string) => Promise<void>;
+	className?: string;
+}
+
+interface DeleteConfirmationModalProps {
+	isOpen: boolean;
+	onClose: () => void;
+	onConfirm: () => void;
+	postTitle: string;
+	isDeleting: boolean;
+}
+
+const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
+	isOpen,
+	onClose,
+	onConfirm,
+	postTitle,
+	isDeleting,
+}) => {
+	if (!isOpen) return null;
+
+	return (
+		<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+			<div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+				<div className="flex items-center justify-between mb-4">
+					<div className="flex items-center space-x-3">
+						<div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+							<AlertTriangle className="w-5 h-5 text-red-600" />
+						</div>
+						<h3 className="text-lg font-semibold text-gray-900">
+							Delete Post
+						</h3>
+					</div>
+					<button
+						onClick={onClose}
+						className="text-gray-400 hover:text-gray-600 transition-colors"
+						disabled={isDeleting}
+					>
+						<X className="w-5 h-5" />
+					</button>
+				</div>
+
+				<div className="mb-6">
+					<p className="text-gray-700 mb-3">
+						Are you sure you want to delete this post? This action
+						cannot be undone.
+					</p>
+					<div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+						<p className="text-sm font-medium text-gray-900 truncate">
+							"{postTitle}"
+						</p>
+					</div>
+				</div>
+
+				<div className="flex space-x-3">
+					<button
+						onClick={onClose}
+						className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 font-medium transition-colors"
+						disabled={isDeleting}
+					>
+						Cancel
+					</button>
+					<button
+						onClick={onConfirm}
+						className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+						disabled={isDeleting}
+					>
+						{isDeleting ? "Deleting..." : "Delete Post"}
+					</button>
+				</div>
+			</div>
+		</div>
+	);
+};
+
+export const PostActions: React.FC<PostActionsProps> = ({
+	post,
+	currentUserId,
+	onEdit,
+	onDelete,
+	className = "",
+}) => {
+	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [isDeleting, setIsDeleting] = useState(false);
+
+	// Only show actions if user owns the post
+	const canManagePost = currentUserId && post.authorId === currentUserId;
+
+	if (!canManagePost) {
+		return null;
+	}
+
+	const handleEdit = () => {
+		setIsDropdownOpen(false);
+
+		// Get category from categories array or create a default one
+		const categoryData = {
+			id: post.category, // Assuming category is stored as ID
+			name: post.category, // You might need to map this properly
+		};
+
+		onEdit({
+			id: post.id,
+			title: post.title,
+			content: post.content,
+			category: categoryData,
+			isAnonymous: post.isAnonymous || false,
+		});
+	};
+
+	const handleDeleteClick = () => {
+		setIsDropdownOpen(false);
+		setShowDeleteModal(true);
+	};
+
+	const handleConfirmDelete = async () => {
+		setIsDeleting(true);
+		try {
+			await onDelete(post.id);
+			setShowDeleteModal(false);
+		} catch (error) {
+			console.error("Delete failed:", error);
+		} finally {
+			setIsDeleting(false);
+		}
+	};
+
+	return (
+		<>
+			<div className={`relative ${className}`}>
+				<button
+					onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+					className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+					title="Post options"
+				>
+					<MoreHorizontal className="w-4 h-4 text-gray-500" />
+				</button>
+
+				{isDropdownOpen && (
+					<>
+						{/* Backdrop */}
+						<div
+							className="fixed inset-0 z-10"
+							onClick={() => setIsDropdownOpen(false)}
+						/>
+
+						{/* Dropdown Menu */}
+						<div className="absolute left-0 top-5 bg-white border border-gray-200 rounded-lg shadow-lg z-20 min-w-[140px]">
+							<div className="py-1">
+								<button
+									onClick={handleEdit}
+									className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+								>
+									<Edit2 className="w-4 h-4" />
+									<span>Edit Post</span>
+								</button>
+								<button
+									onClick={handleDeleteClick}
+									className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+								>
+									<Trash2 className="w-4 h-4" />
+									<span>Delete Post</span>
+								</button>
+							</div>
+						</div>
+					</>
+				)}
+			</div>
+
+			{/* Delete Confirmation Modal */}
+			<DeleteConfirmationModal
+				isOpen={showDeleteModal}
+				onClose={() => setShowDeleteModal(false)}
+				onConfirm={handleConfirmDelete}
+				postTitle={post.title}
+				isDeleting={isDeleting}
+			/>
+		</>
 	);
 };
 

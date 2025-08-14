@@ -174,9 +174,15 @@ export interface Post {
 	category?: string;
 	author: string;
 	createdAt: string;
+	updatedAt?: string;
 	threadNumber?: number;
 	reactions: Partial<Record<ReactionType, ReactionState>>;
 	comments: Comment[];
+	viewCount?: number;
+	isPinned?: boolean;
+	commentCount: number;
+	authorId?: string;
+	isAnonymous: boolean;
 }
 
 export interface Comment {
@@ -192,4 +198,6 @@ export interface Comment {
 	updatedAt: string;
 	reactions: Partial<Record<ReactionType, ReactionState>>;
 	replies?: Comment[];
+	userId?: string;
+
 }
