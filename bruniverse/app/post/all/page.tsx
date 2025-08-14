@@ -80,7 +80,7 @@ const MainPostPage = () => {
 				},
 				star: { isActive: false, count: 3 },
 			},
-			content: `Hey everyone! 👋\nHope you're all doing great! I'm currently starting to think about internships and wanted to ask for some advice from folks who've been through the process. I'm especially interested in roles related to creative tech, product design, music + AI.\nFeel free to drop any advice here or DM me — I really appreciate it! 🙏\nThanks in advance!!`,
+			content: "Hey everyone! 👋\nHope you're all doing great! I'm currently starting to think about internships and wanted to ask for some advice from folks who've been through the process. I'm especially interested in roles related to creative tech, product design, music + AI.\nFeel free to drop any advice here or DM me — I really appreciate it! 🙏\nThanks in advance!!",
 			comments: [
 				{
 					id: "1",
@@ -114,7 +114,7 @@ const MainPostPage = () => {
 				},
 				star: { isActive: false, count: 3 },
 			},
-			content: `Looking for people to form a study group for CS150. We can meet twice a week to go over problem sets and prepare for exams together.`,
+			content: "Looking for people to form a study group for CS150. We can meet twice a week to go over problem sets and prepare for exams together.",
 			comments: [
 				{
 					id: "2",
@@ -163,7 +163,7 @@ const MainPostPage = () => {
 				},
 				star: { isActive: false, count: 3 },
 			},
-			content: `New to the area and looking for good coffee shops to study at. Any recommendations for places with good wifi and a quiet atmosphere?`,
+			content: "New to the area and looking for good coffee shops to study at. Any recommendations for places with good wifi and a quiet atmosphere?",
 			comments: [
 				{
 					id: "4",
@@ -236,7 +236,7 @@ const MainPostPage = () => {
 					placeholder: "Search Posts",
 					style: "absolute left-[43.92vw] top-[6.31vh] h-[6.39vh] w-[39.12vw]",
 				}}
-				userSection={{ show: true, position: "right", style: `` }}
+				userSection={{ show: true, position: "right", style: "" }}
 			/>
 
 			<div className="absolute top-[15vh] w-full h-[80vh] py-3 px-3">
@@ -267,7 +267,7 @@ const MainPostPage = () => {
 				<PostCreationModal
 					categories={categories}
 					onClose={() => setCreatePost(false)}
-					className={`z-50 top-[13vh]`}
+					className={"z-50 top-[13vh]"}
 				/>
 			)}
 		</div>

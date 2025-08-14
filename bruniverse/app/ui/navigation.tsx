@@ -5,9 +5,7 @@ import React, { useState, useEffect } from "react";
 import {
 	Menu,
 	X,
-	Home,
 	User,
-	Settings,
 	ChevronDown,
 	Search,
 	Bell,
@@ -43,7 +41,6 @@ const bearLogo = (
  */
 const Navigation: React.FC<NavigationProps> = ({
 	items, // a list of nav items to be displayed on the navigation bar
-	position = "top", // whether bar should be displayed on top or at the side
 	variant = "default",
 	logo,
 	userSection, // to be displayed when user logs in
@@ -613,10 +610,8 @@ export const PostNavigation = ({
 	);
 
 	const renderUserSection = () => {
-		const { username, email, avatar } = userSection.user || {
+		const { username } = userSection.user || {
 			username: "Bruno",
-			email: "@brown.edu",
-			avatar: "/",
 		};
 
 		return (

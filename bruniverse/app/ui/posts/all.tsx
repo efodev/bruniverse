@@ -1,16 +1,9 @@
 import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { Post, ReactionState, ReactionType } from "../definitions";
+import { Post } from "../definitions";
 import { inter } from "../fonts";
 import { Reactions } from "../util/reactions";
 import { createReactionHandler } from "@/app/lib/reactions";
-
-// Category Filter Component
-interface CategoryFilterProps {
-	categories: string[];
-	activeCategory: string;
-	onCategoryChange: (category: string) => void;
-}
 
 // Left Sidebar Component with categories and posts list
 export interface LeftSideBarTopLevelItemsProps {
@@ -84,7 +77,9 @@ export const LeftSidebar = ({
 													dropdownItem.id
 												)
 											}
-											className={`w-full text-left px-4 py-2 text-sm font-medium transition-colors text-white border-[#CC8100B0] hover:text-red-600`}
+											className={
+												"w-full text-left px-4 py-2 text-sm font-medium transition-colors text-white border-[#CC8100B0] hover:text-red-600"
+											}
 										>
 											{dropdownItem.name}
 										</button>
@@ -169,7 +164,9 @@ export const RightContentArea = ({
 		<div className={`flex-1 p-6 max-h-screen overflow-y-auto ${style}`}>
 			<div className="flex items-start space-x-4">
 				<div
-					className={`size-18 bg-amber-900 rounded-full flex items-center justify-center text-white font-semibold text-5xl`}
+					className={
+						"size-18 bg-amber-900 rounded-full flex items-center justify-center text-white font-semibold text-5xl"
+					}
 				>
 					{selectedPost.author.charAt(0)}
 				</div>

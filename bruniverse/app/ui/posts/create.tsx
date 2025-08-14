@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FlexButton } from "../util/buttons";
 import {
 	Bold,
@@ -11,12 +11,9 @@ import {
 	X,
 } from "lucide-react";
 import {
-	getDrafts,
 	updateDraft,
-	validatePostInput,
 	saveDraft,
 	useDraftPagination,
-	createPost,
 } from "@/app/lib/post/util";
 import { Category, Draft } from "../definitions";
 import { ToastMessage } from "../util/toast";
@@ -437,77 +434,77 @@ interface DraftSidebarProps {
 	className?: string;
 }
 
-const DraftsSidebar = ({
-	drafts,
-	onDraftClick,
-	style,
-	className,
-}: DraftSidebarProps) => {
-	return (
-		<div className={`h-full flex flex-col ${className}`}>
-			<div className="flex items-center justify-between mb-4">
-				<h3 className="text-xl font-bold text-gray-800">Your Drafts</h3>
-				<span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-					{drafts.length}
-				</span>
-			</div>
+// const DraftsSidebar = ({
+// 	drafts,
+// 	onDraftClick,
+// 	style,
+// 	className,
+// }: DraftSidebarProps) => {
+// 	return (
+// 		<div className={`h-full flex flex-col ${className}`}>
+// 			<div className="flex items-center justify-between mb-4">
+// 				<h3 className="text-xl font-bold text-gray-800">Your Drafts</h3>
+// 				<span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+// 					{drafts.length}
+// 				</span>
+// 			</div>
 
-			{drafts.length === 0 ? (
-				<div className="flex-1 flex flex-col items-center justify-center text-center py-8">
-					<div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-						<FileText className="w-8 h-8 text-gray-400" />
-					</div>
-					<h4 className="text-lg font-medium text-gray-600 mb-2">
-						No drafts yet
-					</h4>
-					<p className="text-sm text-gray-500 max-w-xs">
-						Start writing your post and save it as a draft to access
-						it later.
-					</p>
-				</div>
-			) : (
-				<div className="flex-1 overflow-y-auto space-y-3 pr-1">
-					{drafts.map((draft, index) => (
-						<div
-							key={draft.id}
-							className="group p-3 bg-[#D9D9D942] rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer"
-							onClick={() => onDraftClick(draft)}
-						>
-							<div className="flex items-start justify-between mb-2">
-								<h4 className="font-semibold text-gray-800 truncate flex-1 group-hover:text-[#A70B0B] transition-colors">
-									{draft.title || `Draft ${index + 1}`}
-								</h4>
-								<span className="text-xs text-gray-400 ml-2 flex-shrink-0">
-									{draft.date}
-								</span>
-							</div>
+// 			{drafts.length === 0 ? (
+// 				<div className="flex-1 flex flex-col items-center justify-center text-center py-8">
+// 					<div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+// 						<FileText className="w-8 h-8 text-gray-400" />
+// 					</div>
+// 					<h4 className="text-lg font-medium text-gray-600 mb-2">
+// 						No drafts yet
+// 					</h4>
+// 					<p className="text-sm text-gray-500 max-w-xs">
+// 						Start writing your post and save it as a draft to access
+// 						it later.
+// 					</p>
+// 				</div>
+// 			) : (
+// 				<div className="flex-1 overflow-y-auto space-y-3 pr-1">
+// 					{drafts.map((draft, index) => (
+// 						<div
+// 							key={draft.id}
+// 							className="group p-3 bg-[#D9D9D942] rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer"
+// 							onClick={() => onDraftClick(draft)}
+// 						>
+// 							<div className="flex items-start justify-between mb-2">
+// 								<h4 className="font-semibold text-gray-800 truncate flex-1 group-hover:text-[#A70B0B] transition-colors">
+// 									{draft.title || `Draft ${index + 1}`}
+// 								</h4>
+// 								<span className="text-xs text-gray-400 ml-2 flex-shrink-0">
+// 									{draft.date}
+// 								</span>
+// 							</div>
 
-							{draft.content && (
-								<p className="text-sm text-gray-600 line-clamp-2 mb-2">
-									{draft.content
-										.replace(/<[^>]*>/g, "")
-										.substring(0, 100)}
-									{draft.content.length > 100 ? "..." : ""}
-								</p>
-							)}
+// 							{draft.content && (
+// 								<p className="text-sm text-gray-600 line-clamp-2 mb-2">
+// 									{draft.content
+// 										.replace(/<[^>]*>/g, "")
+// 										.substring(0, 100)}
+// 									{draft.content.length > 100 ? "..." : ""}
+// 								</p>
+// 							)}
 
-							<div className="flex items-center justify-between">
-								<span className="px-2 py-1 bg-[#CC81001A] text-xs rounded-full text-gray-700">
-									{draft.category.name}
-								</span>
-								{draft.is_anonymous && (
-									<span className="text-xs text-gray-500 italic">
-										Anonymous
-									</span>
-								)}
-							</div>
-						</div>
-					))}
-				</div>
-			)}
-		</div>
-	);
-};
+// 							<div className="flex items-center justify-between">
+// 								<span className="px-2 py-1 bg-[#CC81001A] text-xs rounded-full text-gray-700">
+// 									{draft.category.name}
+// 								</span>
+// 								{draft.is_anonymous && (
+// 									<span className="text-xs text-gray-500 italic">
+// 										Anonymous
+// 									</span>
+// 								)}
+// 							</div>
+// 						</div>
+// 					))}
+// 				</div>
+// 			)}
+// 		</div>
+// 	);
+// };
 
 // Rich Text Editor Component (unchanged)
 const RichTextEditor = ({

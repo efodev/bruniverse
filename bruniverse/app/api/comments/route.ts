@@ -399,11 +399,10 @@ export async function PUT(request: NextRequest) {
 			WHERE id = $2
 			RETURNING updated_at
 		`;
-		const updateResult = await db.query(updateQuery, [
+		await db.query(updateQuery, [
 			content.trim(),
 			commentId,
 		]);
-		const updatedAt = updateResult.rows[0].updated_at;
 
 		// Get updated comment with user info
 		const getUpdatedQuery = `

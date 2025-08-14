@@ -1,8 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-	EmailVerificationProps,
-	EmailVerificationResult,
-} from "@/app/ui/definitions";
+import { EmailVerificationProps } from "@/app/ui/definitions";
 import { useRouter } from "next/navigation";
 
 export default function EmailVerification({
@@ -165,7 +162,7 @@ export default function EmailVerification({
 					{/* Resend Code Section */}
 					<div className="text-left mb-6">
 						<span className="text-[#770000] text-xl font-bold m-3">
-							Didn't Receive it?
+							Didn&apo;t Receive it?"
 						</span>
 						<button
 							onClick={handleResendCode}
@@ -214,7 +211,8 @@ export default function EmailVerification({
 					{/* Footer */}
 					<div className="text-center mt-6">
 						<p className="text-xs text-gray-500">
-							Check your spam folder if you don't see the email
+							Check your spam folder if you don&apo;st see the
+							email
 						</p>
 					</div>
 				</div>

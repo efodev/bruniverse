@@ -1,7 +1,6 @@
 /// @app/lib/auth/verify-email.ts
 import nodemailer from "nodemailer";
 import emailjs from "@emailjs/browser";
-import { randomBytes } from "crypto";
 
 // Create transporter with server-side env vars
 const transporter = nodemailer.createTransport({

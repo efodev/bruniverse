@@ -1,7 +1,7 @@
 // app/api/posts/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/app/database/db";
-import { validateApiPostInput, parseUserData, parseUserToken } from "../lib";
+import { validateApiPostInput, parseUserToken } from "../lib";
 
 interface CreatePostRequest {
 	title: string;
@@ -619,7 +619,7 @@ export async function GET(request: NextRequest) {
 		const postsResult = await db.query(finalQuery, finalParams);
 
 		// Get total count for pagination
-		let countQuery = `
+		const countQuery = `
       SELECT COUNT(*) as total
       FROM posts p
       LEFT JOIN users u ON p.user_id = u.id

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
-import Link from "next/link";
 import db from "./database/db";
 
 // Graceful shutdown of database
@@ -26,8 +25,10 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en"
-		className="text-base">
+		<html
+			lang="en"
+			className="text-base"
+		>
 			<body
 				className={`${montserrat.className} antialiased min-w-dvh min-h-dvh font-sans`}
 			>

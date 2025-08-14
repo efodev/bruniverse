@@ -180,7 +180,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 						>
 							<label
 								htmlFor={field.id}
-								className={`block text-sm font-medium`}
+								className={"block text-sm font-medium"}
 							>
 								{field.label}
 								{field.required && (
