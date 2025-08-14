@@ -22,7 +22,7 @@ import {
 	fetchPosts,
 	updatePost,
 } from "@/app/lib/post/util";
-import { fetchCategories } from "@/app/post/all/page";
+import { fetchCategories } from "@/app/lib/post/util";
 import { PostNavigation } from "../navigation";
 
 // Types
@@ -957,7 +957,7 @@ const EnhancedMainPostPage = () => {
 
 	// Fetch categories on mount
 	useEffect(() => {
-		fetchCategories().then((res) => {
+		fetchCategories().then((res: Category[]) => {
 			console.log("res ", res);
 			setCategories(res);
 		});

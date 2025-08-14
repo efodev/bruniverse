@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import db from "./database/db";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 // Graceful shutdown of database
 process.on("SIGINT", async () => {

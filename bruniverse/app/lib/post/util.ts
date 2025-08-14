@@ -1,4 +1,4 @@
-import { Draft } from "@/app/ui/definitions";
+import { Category, Draft } from "@/app/ui/definitions";
 import { useCallback, useEffect, useState } from "react";
 
 // Helper function to validate input
@@ -693,3 +693,24 @@ export const fetchPosts = async (params: {
 		};
 	}
 };
+
+// Categories:
+/**
+ * Helper method for fetching post categories
+ * @returns a list of category objects
+ */
+export async function fetchCategories(): Promise<Category[]> {
+	try {
+		const response = await fetch("/api/posts/categories", {
+			headers: {
+				"Content-Type": "application/json",
+				"x-user-data": sessionStorage.getItem("user") as string,
+			},
+		});
+		const res = await response.json();
+		return res.success ? res.data : [];
+	} catch (error) {
+		console.log(error);
+		return [];
+	}
+}
