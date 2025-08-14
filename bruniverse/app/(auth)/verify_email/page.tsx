@@ -2,14 +2,12 @@
 "use client";
 
 import EmailVerification from "@/app/ui/auth/email_verification";
-import { EmailVerificationResult } from "@/app/ui/definitions";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
 export default function EmailVerificationPage() {
 	const searchParams = useSearchParams();
 	const token = searchParams.get("token");
-	const id = searchParams.get("id");
 
 	const verifyEmail = async (otp: string) => {
 		try {
@@ -21,7 +19,7 @@ export default function EmailVerificationPage() {
 				body: JSON.stringify({ token, otp }),
 			});
 
-			const { success, data, message } = await response.json();
+			const { success, message } = await response.json();
 			return { success, message };
 		} catch (error) {
 			console.log(error);

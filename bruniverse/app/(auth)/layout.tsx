@@ -1,5 +1,5 @@
 /// app/auth/layout.tsx
-import { NavBar, PostNavigation } from "../ui/navigation";
+import { PostNavigation } from "../ui/navigation";
 import Link from "next/link";
 
 export default function AuthLayout({

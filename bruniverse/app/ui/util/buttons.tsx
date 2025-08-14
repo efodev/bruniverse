@@ -1,15 +1,4 @@
 import React, { ReactNode, useState } from "react";
-import {
-	Menu,
-	Bold,
-	Italic,
-	AlignLeft,
-	AlignCenter,
-	AlignRight,
-	Link,
-	Paperclip,
-	Underline,
-} from "lucide-react";
 
 interface FlexButtonProps {
 	children?: ReactNode;

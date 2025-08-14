@@ -1,8 +1,8 @@
-// app/api/comments/route.ts
 import { NextRequest, NextResponse } from "next/server";
+import { parseUserToken } from "../lib";
 import db from "@/app/database/db";
 
-// Mock database - replace with your actual database implementation
+// Comment interface matching your required format
 interface Comment {
 	id: string;
 	postId: string;
@@ -10,44 +10,17 @@ interface Comment {
 	content: string;
 	author: string;
 	authorId: string;
+	isAnonymous: boolean;
+	isDeleted: boolean;
 	createdAt: string;
+	updatedAt: string;
 	reactions: {
-		heart: { count: number; isActive: boolean };
-		star: { count: number; isActive: boolean };
+		like: { count: number; isActive: boolean };
+		helpful: { count: number; isActive: boolean };
+		thanks: { count: number; isActive: boolean };
 	};
 	replies?: Comment[];
 }
-
-// This would be your actual database
-let commentsDB: Comment[] = [
-	{
-		id: "1",
-		postId: "post1",
-		content: "This is a great post!",
-		author: "Alice Johnson",
-		authorId: "user1",
-		createdAt: "2 hours ago",
-		reactions: {
-			heart: { count: 3, isActive: false },
-			star: { count: 1, isActive: true },
-		},
-		replies: [
-			{
-				id: "2",
-				postId: "post1",
-				parentCommentId: "1",
-				content: "I totally agree with you!",
-				author: "Bob Smith",
-				authorId: "user2",
-				createdAt: "1 hour ago",
-				reactions: {
-					heart: { count: 1, isActive: false },
-					star: { count: 0, isActive: false },
-				},
-			},
-		],
-	},
-];
 
 // Helper function to organize comments into nested structure
 function organizeComments(comments: Comment[]): Comment[] {
@@ -75,8 +48,84 @@ function organizeComments(comments: Comment[]): Comment[] {
 	return rootComments;
 }
 
+// Helper function to get reaction counts and user's reaction status
+async function getCommentReactions(
+	commentId: string,
+	userId?: string
+): Promise<{
+	like: { count: number; isActive: boolean };
+	helpful: { count: number; isActive: boolean };
+	thanks: { count: number; isActive: boolean };
+}> {
+	try {
+		// Get reaction counts
+		const countQuery = `
+			SELECT reaction_type, COUNT(*) as count
+			FROM reactions 
+			WHERE comment_id = ?
+			GROUP BY reaction_type
+		`;
+		const countResult = await db.query(countQuery, [commentId]);
+		const counts = countResult.rows;
+
+		// Get user's reactions if userId provided
+		let userReactions = [];
+		if (userId) {
+			const userReactionQuery = `
+				SELECT reaction_type 
+				FROM reactions 
+				WHERE comment_id = ? AND user_id = ?
+			`;
+			const userReactionResult = await db.query(userReactionQuery, [
+				commentId,
+				userId,
+			]);
+			userReactions = userReactionResult.rows;
+		}
+
+		const likeCount =
+			counts.find((c: any) => c.reaction_type === "like")?.count || 0;
+		const helpfulCount =
+			counts.find((c: any) => c.reaction_type === "helpful")?.count || 0;
+		const thanksCount =
+			counts.find((c: any) => c.reaction_type === "thanks")?.count || 0;
+
+		const userLikeReaction = userReactions.some(
+			(r: any) => r.reaction_type === "like"
+		);
+		const userHelpfulReaction = userReactions.some(
+			(r: any) => r.reaction_type === "helpful"
+		);
+		const userThanksReaction = userReactions.some(
+			(r: any) => r.reaction_type === "thanks"
+		);
+
+		return {
+			like: { count: parseInt(likeCount), isActive: userLikeReaction },
+			helpful: {
+				count: parseInt(helpfulCount),
+				isActive: userHelpfulReaction,
+			},
+			thanks: {
+				count: parseInt(thanksCount),
+				isActive: userThanksReaction,
+			},
+		};
+	} catch (error) {
+		console.error("Error fetching reactions:", error);
+		return {
+			like: { count: 0, isActive: false },
+			helpful: { count: 0, isActive: false },
+			thanks: { count: 0, isActive: false },
+		};
+	}
+}
+
 // GET: Fetch comments for a post
 export async function GET(request: NextRequest) {
+	const token = request.cookies.get("token")!.value;
+	const currentUser = parseUserToken(token)!;
+	const currentUserId = currentUser.id;
 	try {
 		const { searchParams } = new URL(request.url);
 		const postId = searchParams.get("postId");
@@ -88,13 +137,41 @@ export async function GET(request: NextRequest) {
 			);
 		}
 
-		// Filter comments for the specific post
-		const postComments = commentsDB.filter(
-			(comment) => comment.postId === postId
+		// Query to get all comments for the post
+		const query = `
+			SELECT 
+				c.id,
+				c.post_id as postId,
+				c.parent_comment_id as parentCommentId,
+				c.content,
+				c.user_id as authorId,
+				c.is_anonymous as isAnonymous,
+				c.is_deleted as isDeleted,
+				c.created_at as createdAt,
+				c.updated_at as updatedAt,
+				CASE 
+					WHEN c.is_anonymous = true THEN 'Anonymous'
+					ELSE COALESCE(NULLIF(u.username, ''), u.first_name || ' ' || u.last_name)
+				END as author
+			FROM comments c
+			LEFT JOIN users u ON c.user_id = u.id
+			WHERE c.post_id = $1 AND c.is_deleted = false
+			ORDER BY c.created_at ASC
+		`;
+
+		const result = await db.query(query, [postId]);
+		const comments = result.rows;
+
+		// Add reactions to each comment
+		const commentsWithReactions = await Promise.all(
+			comments.map(async (comment: any) => ({
+				...comment,
+				reactions: await getCommentReactions(comment.id, currentUserId),
+			}))
 		);
 
 		// Organize comments into nested structure
-		const organizedComments = organizeComments(postComments);
+		const organizedComments = organizeComments(commentsWithReactions);
 
 		return NextResponse.json(organizedComments);
 	} catch (error) {
@@ -109,8 +186,25 @@ export async function GET(request: NextRequest) {
 // POST: Create a new comment or reply
 export async function POST(request: NextRequest) {
 	try {
+		// Parse user token to get current user
+		const token = request.cookies.get("token");
+		if (!token) {
+			return NextResponse.json(
+				{ error: "Authentication required" },
+				{ status: 401 }
+			);
+		}
+
+		const currentUser = parseUserToken(token.value);
+		if (!currentUser?.id) {
+			return NextResponse.json(
+				{ error: "Invalid user token" },
+				{ status: 401 }
+			);
+		}
+
 		const body = await request.json();
-		const { postId, parentCommentId, content } = body;
+		const { postId, parentCommentId, content, isAnonymous = false } = body;
 
 		// Validation
 		if (!postId || !content) {
@@ -134,32 +228,85 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		// In a real app, you'd get this from authentication
-		const currentUser = {
-			id: "current-user-id",
-			name: "Current User",
-		};
+		// Verify post exists
+		const postCheckQuery = "SELECT id FROM posts WHERE id = $1";
+		const postCheckResult = await db.query(postCheckQuery, [postId]);
+		if (postCheckResult.rows.length === 0) {
+			return NextResponse.json(
+				{ error: "Post not found" },
+				{ status: 404 }
+			);
+		}
 
-		// Create new comment
+		// If it's a reply, verify parent comment exists
+		if (parentCommentId) {
+			const parentCheckQuery =
+				"SELECT id FROM comments WHERE id = $1 AND post_id = $2 AND is_deleted = false";
+			const parentCheckResult = await db.query(parentCheckQuery, [
+				parentCommentId,
+				postId,
+			]);
+			if (parentCheckResult.rows.length === 0) {
+				return NextResponse.json(
+					{ error: "Parent comment not found" },
+					{ status: 404 }
+				);
+			}
+		}
+
+		// Insert comment into database - let UUID be generated by default
+		const insertQuery = `
+			INSERT INTO comments (post_id, parent_comment_id, content, user_id, is_anonymous)
+			VALUES ($1, $2, $3, $4, $5)
+			RETURNING id, created_at, updated_at
+		`;
+
+		const insertResult = await db.query(insertQuery, [
+			postId,
+			parentCommentId || null,
+			content.trim(),
+			currentUser.id,
+			isAnonymous,
+		]);
+
+		const insertedComment = insertResult.rows[0];
+		const commentId = insertedComment.id;
+		const createdAt = insertedComment.created_at;
+		const updatedAt = insertedComment.updated_at;
+
+		// Get user name for response
+		let authorName = "Anonymous";
+		if (!isAnonymous) {
+			const userQuery =
+				"SELECT username, first_name, last_name FROM users WHERE id = $1";
+			const userResult = await db.query(userQuery, [currentUser.id]);
+			if (userResult.rows.length > 0) {
+				const user = userResult.rows[0];
+				authorName =
+					user.username || `${user.first_name} ${user.last_name}`;
+			}
+		}
+
+		// Create response comment object
 		const newComment: Comment = {
-			id: `comment-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+			id: commentId,
 			postId,
 			parentCommentId: parentCommentId || undefined,
 			content: content.trim(),
-			author: currentUser.name,
+			author: authorName,
 			authorId: currentUser.id,
-			createdAt: "just now",
+			isAnonymous,
+			isDeleted: false,
+			createdAt: createdAt,
+			updatedAt: updatedAt,
 			reactions: {
-				heart: { count: 0, isActive: false },
-				star: { count: 0, isActive: false },
+				like: { count: 0, isActive: false },
+				helpful: { count: 0, isActive: false },
+				thanks: { count: 0, isActive: false },
 			},
 			replies: [],
 		};
 
-		// Add to database
-		commentsDB.push(newComment);
-
-		// Return the created comment
 		return NextResponse.json(newComment, { status: 201 });
 	} catch (error) {
 		console.error("Error creating comment:", error);
@@ -173,6 +320,23 @@ export async function POST(request: NextRequest) {
 // PUT: Update a comment
 export async function PUT(request: NextRequest) {
 	try {
+		// Parse user token to get current user
+		const token = request.cookies.get("token");
+		if (!token) {
+			return NextResponse.json(
+				{ error: "Authentication required" },
+				{ status: 401 }
+			);
+		}
+
+		const currentUser = parseUserToken(token.value);
+		if (!currentUser?.id) {
+			return NextResponse.json(
+				{ error: "Invalid user token" },
+				{ status: 401 }
+			);
+		}
+
 		const body = await request.json();
 		const { commentId, content } = body;
 
@@ -184,29 +348,97 @@ export async function PUT(request: NextRequest) {
 			);
 		}
 
-		// Find and update comment
-		const commentIndex = commentsDB.findIndex(
-			(comment) => comment.id === commentId
-		);
-		if (commentIndex === -1) {
+		if (content.trim().length === 0) {
+			return NextResponse.json(
+				{ error: "Comment content cannot be empty" },
+				{ status: 400 }
+			);
+		}
+
+		if (content.length > 1000) {
+			return NextResponse.json(
+				{ error: "Comment content cannot exceed 1000 characters" },
+				{ status: 400 }
+			);
+		}
+
+		// Check if comment exists and user owns it
+		const checkQuery = `
+			SELECT id, user_id, is_deleted 
+			FROM comments 
+			WHERE id = ?
+		`;
+		const commentResult = await db.query(checkQuery, [commentId]);
+
+		if (commentResult.rows.length === 0) {
 			return NextResponse.json(
 				{ error: "Comment not found" },
 				{ status: 404 }
 			);
 		}
 
-		// In a real app, check if user owns the comment
-		const currentUserId = "current-user-id";
-		if (commentsDB[commentIndex].authorId !== currentUserId) {
+		const comment = commentResult.rows[0];
+		if (comment.is_deleted) {
+			return NextResponse.json(
+				{ error: "Cannot edit deleted comment" },
+				{ status: 400 }
+			);
+		}
+
+		if (comment.user_id !== currentUser.id) {
 			return NextResponse.json(
 				{ error: "Unauthorized to edit this comment" },
 				{ status: 403 }
 			);
 		}
 
-		commentsDB[commentIndex].content = content.trim();
+		// Update comment
+		const updateQuery = `
+			UPDATE comments 
+			SET content = $1, updated_at = CURRENT_TIMESTAMP
+			WHERE id = $2
+			RETURNING updated_at
+		`;
+		const updateResult = await db.query(updateQuery, [
+			content.trim(),
+			commentId,
+		]);
+		const updatedAt = updateResult.rows[0].updated_at;
 
-		return NextResponse.json(commentsDB[commentIndex]);
+		// Get updated comment with user info
+		const getUpdatedQuery = `
+			SELECT 
+				c.id,
+				c.post_id as postId,
+				c.parent_comment_id as parentCommentId,
+				c.content,
+				c.user_id as authorId,
+				c.is_anonymous as isAnonymous,
+				c.is_deleted as isDeleted,
+				c.created_at as createdAt,
+				c.updated_at as updatedAt,
+				CASE 
+					WHEN c.is_anonymous = true THEN 'Anonymous'
+					ELSE COALESCE(u.username, u.first_name || ' ' || u.last_name)
+				END as author
+			FROM comments c
+			LEFT JOIN users u ON c.user_id = u.id
+			WHERE c.id = $1
+		`;
+
+		const updatedCommentResult = await db.query(getUpdatedQuery, [
+			commentId,
+		]);
+		const updatedComment = updatedCommentResult.rows[0];
+
+		// Add reactions
+		updatedComment.reactions = await getCommentReactions(
+			commentId,
+			currentUser.id
+		);
+		updatedComment.replies = [];
+
+		return NextResponse.json(updatedComment);
 	} catch (error) {
 		console.error("Error updating comment:", error);
 		return NextResponse.json(
@@ -216,9 +448,26 @@ export async function PUT(request: NextRequest) {
 	}
 }
 
-// DELETE: Delete a comment
+// DELETE: Delete a comment (soft delete)
 export async function DELETE(request: NextRequest) {
 	try {
+		// Parse user token to get current user
+		const token = request.cookies.get("token");
+		if (!token) {
+			return NextResponse.json(
+				{ error: "Authentication required" },
+				{ status: 401 }
+			);
+		}
+
+		const currentUser = parseUserToken(token.value);
+		if (!currentUser?.id) {
+			return NextResponse.json(
+				{ error: "Invalid user token" },
+				{ status: 401 }
+			);
+		}
+
 		const { searchParams } = new URL(request.url);
 		const commentId = searchParams.get("commentId");
 
@@ -229,33 +478,43 @@ export async function DELETE(request: NextRequest) {
 			);
 		}
 
-		// Find comment
-		const commentIndex = commentsDB.findIndex(
-			(comment) => comment.id === commentId
-		);
-		if (commentIndex === -1) {
+		// Check if comment exists and user owns it
+		const checkQuery = `
+			SELECT id, user_id, is_deleted 
+			FROM comments 
+			WHERE id = $1
+		`;
+		const commentResult = await db.query(checkQuery, [commentId]);
+
+		if (commentResult.rows.length === 0) {
 			return NextResponse.json(
 				{ error: "Comment not found" },
 				{ status: 404 }
 			);
 		}
 
-		// In a real app, check if user owns the comment
-		const currentUserId = "current-user-id";
-		if (commentsDB[commentIndex].authorId !== currentUserId) {
+		const comment = commentResult.rows[0];
+		if (comment.is_deleted) {
+			return NextResponse.json(
+				{ error: "Comment already deleted" },
+				{ status: 400 }
+			);
+		}
+
+		if (comment.user_id !== currentUser.id) {
 			return NextResponse.json(
 				{ error: "Unauthorized to delete this comment" },
 				{ status: 403 }
 			);
 		}
 
-		// Remove comment and its replies
-		const commentToDelete = commentsDB[commentIndex];
-		commentsDB = commentsDB.filter(
-			(comment) =>
-				comment.id !== commentId &&
-				comment.parentCommentId !== commentId
-		);
+		// Soft delete the comment (and optionally its replies)
+		const deleteQuery = `
+			UPDATE comments 
+			SET is_deleted = true, deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+			WHERE id = $1 OR parent_comment_id = $1
+		`;
+		await db.query(deleteQuery, [commentId, commentId]);
 
 		return NextResponse.json({ message: "Comment deleted successfully" });
 	} catch (error) {
@@ -266,61 +525,3 @@ export async function DELETE(request: NextRequest) {
 		);
 	}
 }
-
-// Alternative route for nested comments API structure
-// app/api/posts/[postId]/comments/route.ts
-export const POST_NESTED = async (
-	request: NextRequest,
-	{ params }: { params: { postId: string } }
-) => {
-	const postId = params.postId;
-	// Same logic as POST above but with postId from URL params
-	// This provides a more RESTful API structure
-};
-
-// Alternative route for individual comment operations
-// app/api/comments/[commentId]/route.ts
-export const GET_SINGLE = async (
-	request: NextRequest,
-	{ params }: { params: { commentId: string } }
-) => {
-	const commentId = params.commentId;
-	const comment = commentsDB.find((c) => c.id === commentId);
-
-	if (!comment) {
-		return NextResponse.json(
-			{ error: "Comment not found" },
-			{ status: 404 }
-		);
-	}
-
-	return NextResponse.json(comment);
-};
-
-// Database integration example (replace with your actual database)
-/*
-// With Prisma
-async function getComments(postId: string) {
-  return await prisma.comment.findMany({
-    where: { postId },
-    include: {
-      author: true,
-      replies: {
-        include: {
-          author: true,
-        },
-        orderBy: { createdAt: 'desc' },
-      },
-    },
-    orderBy: { createdAt: 'desc' },
-  });
-}
-
-// With MongoDB
-async function getComments(postId: string) {
-  return await db.collection('comments')
-    .find({ postId })
-    .sort({ createdAt: -1 })
-    .toArray();
-}
-*/
