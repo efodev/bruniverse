@@ -34,9 +34,9 @@ interface DraftData {
 	isAnonymous: boolean;
 }
 
-interface ApiResponse<T> {
+interface ApiResponse<T = any> {
 	success: boolean;
-	message?: string;
+	message: string;
 	data?: T;
 	count?: number;
 }
@@ -478,152 +478,218 @@ export const useDraftPagination = (pageSize: number = 10) => {
 	};
 };
 
-// POST UTILS
-// Update your existing fetchPosts function
-export const fetchPosts = async (
-	page: number,
-	category: string,
-	search: string
-) => {
-	const params = new URLSearchParams({
-		page: page.toString(),
-		limit: "10",
-		...(category !== "all" && { category }),
-		...(search && { search }),
-	});
+// // POST UTILS
+// // Update your existing fetchPosts function
+// export const fetchPosts = async (
+// 	page: number,
+// 	category: string,
+// 	search: string
+// ) => {
+// 	const params = new URLSearchParams({
+// 		page: page.toString(),
+// 		limit: "10",
+// 		...(category !== "all" && { category }),
+// 		...(search && { search }),
+// 	});
 
-	const response = await fetch(`/api/posts?${params}`, {
-		headers: {
-			"Content-Type": "application/json",
-			"x-user-data": sessionStorage.getItem("user") as string,
-			credentials: "include",
-		},
-	});
+// 	const response = await fetch(`/api/posts?${params}`, {
+// 		headers: {
+// 			"Content-Type": "application/json",
+// 			"x-user-data": sessionStorage.getItem("user") as string,
+// 			credentials: "include",
+// 		},
+// 	});
 
-	return await response.json();
-};
+// 	const body = await response.json();
+// 	return body;
+// };
+
+// /**
+//  * Helper method to handle created post
+//  * @param post
+//  */
+// export const createPost = async (post: {}) => {
+// 	const { isValid, error } = validatePostInput(post);
+// 	if (!isValid) {
+// 		return {
+// 			success: false,
+// 			error: "VALIDATION_ERROR",
+// 			message: "Failed to create post.",
+// 		};
+// 	}
+// 	try {
+// 		const res = await fetch("/api/posts", {
+// 			method: "POST",
+// 			headers: {
+// 				"Content-Type": "application/json",
+// 				"x-user-data": sessionStorage.getItem("user") as string,
+// 				credentials: "include",
+// 			},
+// 			body: JSON.stringify(post),
+// 		});
+
+// 		return await res.json();
+// 	} catch (error) {
+// 		return {
+// 			success: false,
+// 			error: "INTERNAL_ERROR",
+// 			message: "Failed to create post.",
+// 		};
+// 	}
+// };
+
+// services/postService.ts
+
+interface PostData {
+	id?: string;
+	title: string;
+	content: string;
+	categoryId: string;
+	isAnonymous: boolean;
+}
 
 /**
- * Helper method to handle created post
- * @param post
+ * Create a new post
  */
-export const createPost = async (post: {}) => {
-	const { isValid, error } = validatePostInput(post);
-	if (!isValid) {
-		return {
-			success: false,
-			error: "VALIDATION_ERROR",
-			message: "Failed to create post.",
-		};
-	}
+export const createPost = async (
+	postData: Omit<PostData, "id">
+): Promise<ApiResponse> => {
 	try {
-		const res = await fetch("/api/posts", {
+		const response = await fetch("/api/posts", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
-				"x-user-data": sessionStorage.getItem("user") as string,
-				credentials: "include",
 			},
-			body: JSON.stringify(post),
+			body: JSON.stringify({
+				title: postData.title,
+				content: postData.content,
+				categoryId: postData.categoryId,
+				is_anonymous: postData.isAnonymous,
+			}),
 		});
 
-		return await res.json();
+		const result = await response.json();
+
+		if (!response.ok) {
+			throw new Error(result.message || "Failed to create post");
+		}
+
+		return result;
 	} catch (error) {
-		console.log(error);
+		console.error("Create post error:", error);
 		return {
 			success: false,
-			error: "INTERNAL_ERROR",
-			message: "Failed to create post.",
+			message:
+				error instanceof Error
+					? error.message
+					: "Failed to create post",
 		};
 	}
 };
 
-// /**
-//  * Update an existing draft
-//  */
-// export async function updateDraft(
-// 	draftId: number,
-// 	draftData: DraftData
-// ): Promise<Draft> {
-// 	try {
-// 		const response = await fetch("/api/drafts", {
-// 			method: "PUT",
-// 			headers: {
-// 				"Content-Type": "application/json",
-// 				"x-user-data": sessionStorage.getItem("user") as string,
-// 				credentials: "include",
-// 			},
-// 			body: JSON.stringify({
-// 				id: draftId,
-// 				...draftData,
-// 			}),
-// 		});
+/**
+ * Update an existing post
+ */
+export const updatePost = async (postData: PostData): Promise<ApiResponse> => {
+	try {
+		const response = await fetch("/api/posts", {
+			method: "PUT",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				id: postData.id,
+				title: postData.title,
+				content: postData.content,
+				categoryId: postData.categoryId,
+				is_anonymous: postData.isAnonymous,
+			}),
+		});
 
-// 		const result: ApiResponse<Draft> = await response.json();
+		const result = await response.json();
 
-// 		if (!response.ok) {
-// 			throw new Error(
-// 				result.message || `HTTP error! status: ${response.status}`
-// 			);
-// 		}
+		if (!response.ok) {
+			throw new Error(result.message || "Failed to update post");
+		}
 
-// 		if (!result.success) {
-// 			throw new Error(result.message || "Failed to update draft");
-// 		}
+		return result;
+	} catch (error) {
+		console.error("Update post error:", error);
+		return {
+			success: false,
+			message:
+				error instanceof Error
+					? error.message
+					: "Failed to update post",
+		};
+	}
+};
 
-// 		if (!result.data) {
-// 			throw new Error("No draft data returned");
-// 		}
+/**
+ * Delete a post
+ */
+export const deletePost = async (postId: string): Promise<ApiResponse> => {
+	try {
+		const response = await fetch(`/api/posts?id=${postId}`, {
+			method: "DELETE",
+		});
 
-// 		return result.data;
-// 	} catch (error) {
-// 		console.error("Error updating draft:", error);
-// 		throw error;
-// 	}
-// }
+		const result = await response.json();
 
-// /**
-//  * Delete a draft
-//  */
-// export async function deleteDraft(draftId: number): Promise<void> {
-// 	try {
-// 		const response = await fetch(`/api/drafts?id=${draftId}`, {
-// 			method: "DELETE",
-// 			headers: {
-// 				"Content-Type": "application/json",
-// 				"x-user-data": sessionStorage.getItem("user") as string,
-// 				credentials: "include",
-// 			},
-// 		});
+		if (!response.ok) {
+			throw new Error(result.message || "Failed to delete post");
+		}
 
-// 		const result: ApiResponse<void> = await response.json();
+		return result;
+	} catch (error) {
+		console.error("Delete post error:", error);
+		return {
+			success: false,
+			message:
+				error instanceof Error
+					? error.message
+					: "Failed to delete post",
+		};
+	}
+};
 
-// 		if (!response.ok) {
-// 			throw new Error(
-// 				result.message || `HTTP error! status: ${response.status}`
-// 			);
-// 		}
+/**
+ * Fetch posts with filtering and pagination
+ */
+export const fetchPosts = async (params: {
+	page?: number;
+	limit?: number;
+	category?: string;
+	search?: string;
+	filter?: string;
+	sortBy?: string;
+}): Promise<ApiResponse> => {
+	try {
+		const searchParams = new URLSearchParams();
 
-// 		if (!result.success) {
-// 			throw new Error(result.message || "Failed to delete draft");
-// 		}
-// 	} catch (error) {
-// 		console.error("Error deleting draft:", error);
-// 		throw new Error("Internal server error.");
-// 	}
-// }
+		if (params.page) searchParams.set("page", params.page.toString());
+		if (params.limit) searchParams.set("limit", params.limit.toString());
+		if (params.category) searchParams.set("category", params.category);
+		if (params.search) searchParams.set("search", params.search);
+		if (params.filter) searchParams.set("filter", params.filter);
+		if (params.sortBy) searchParams.set("sortBy", params.sortBy);
 
-// /**
-//  * Auto-save draft - creates new or updates existing
-//  * This is a convenience function that decides whether to create or update
-//  */
-// export async function autoSaveDraft(
-// 	draftData: DraftData,
-// 	existingDraftId?: string | null
-// ): Promise<Draft> {
-// 	if (existingDraftId) {
-// 		return updateDraft(existingDraftId, draftData);
-// 	} else {
-// 		return saveDraft(draftData);
-// 	}
-// }
+		const response = await fetch(`/api/posts?${searchParams.toString()}`);
+		const result = await response.json();
+
+		if (!response.ok) {
+			throw new Error(result.message || "Failed to fetch posts");
+		}
+
+		return result;
+	} catch (error) {
+		console.error("Fetch posts error:", error);
+		return {
+			success: false,
+			message:
+				error instanceof Error
+					? error.message
+					: "Failed to fetch posts",
+		};
+	}
+};

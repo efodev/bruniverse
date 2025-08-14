@@ -8,19 +8,19 @@ const reactionConfig = {
 		icon: Heart,
 		activeColor: "text-pink-500 bg-pink-50",
 		hoverColor: "hover:text-pink-400 hover:bg-pink-50",
-		label: "Heart",
+		label: "heart",
 	},
 	share: {
 		icon: Share,
 		activeColor: "text-blue-500 bg-blue-50",
 		hoverColor: "hover:text-blue-400 hover:bg-blue-50",
-		label: "Share",
+		label: "share",
 	},
 	star: {
 		icon: Star,
 		activeColor: "text-yellow-500 bg-yellow-50",
 		hoverColor: "hover:text-yellow-400 hover:bg-yellow-50",
-		label: "Star",
+		label: "star",
 	},
 } as const;
 
@@ -30,7 +30,6 @@ export const Reactions = ({
 	size = 18,
 	postId,
 	commentId,
-	userId,
 	onReact,
 	allowedReactions = { heart: true, share: true, star: true },
 	initialStates = {},
@@ -106,7 +105,7 @@ export const Reactions = ({
 						<Icon
 							size={size}
 							fill={reaction.isActive ? "currentColor" : "none"}
-							className={`flex-shrink-0 ${isCurrentlyLoading ? "animate-pulse" : ""}`}
+							className={`flex-shrink-0 z-5 ${isCurrentlyLoading ? "animate-pulse" : ""}`}
 						/>
 						{showCount && (
 							<span

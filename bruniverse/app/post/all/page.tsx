@@ -8,7 +8,7 @@ import {
 } from "@/app/ui/posts/all";
 import { PostCreationModal } from "@/app/ui/posts/create";
 import { Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { Category, Post } from "@/app/ui/definitions";
 
 // Main App Component
@@ -18,6 +18,7 @@ const MainPostPage = () => {
 	const [createPost, setCreatePost] = useState<boolean>(false);
 	const [categories, setCategories] = useState<Category[]>([]);
 
+	useLayoutEffect(() => {});
 	useEffect(() => {
 		fetchCategories().then((res) => {
 			setCategories(res);
@@ -117,7 +118,6 @@ const MainPostPage = () => {
 			comments: [
 				{
 					id: "2",
-					title: "",
 					content: "I'm interested! What days work best for you?",
 					category: "",
 					author: "Sarah Johnson",
@@ -167,7 +167,6 @@ const MainPostPage = () => {
 			comments: [
 				{
 					id: "4",
-					title: "",
 					content:
 						"Blue State Coffee is great! They have excellent wifi and plenty of seating.",
 					category: "",

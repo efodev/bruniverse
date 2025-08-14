@@ -145,7 +145,7 @@ export const RightContentArea = ({
 	style: string;
 }) => {
 	const userId = "";
-	const handleReaction = createReactionHandler(userId);
+	const handleReaction = createReactionHandler();
 
 	if (!selectedPost) {
 		return (
