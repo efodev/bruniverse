@@ -1,4 +1,4 @@
-import db, { DatabaseError, handleDatabaseError } from "@/app/database/db";
+import db, { DatabaseError } from "@/app/database/db";
 import {
 	userByEmailTransact,
 	getLoginAttemptsTransact,
@@ -24,7 +24,11 @@ export async function loginDb(req: Record<string, string>) {
 		// Get login attempt status regardless of whether user exists
 		const loginStatus = await getLoginAttemptStatus(email);
 		// Check if account is locked based on recent failed attempts
-		if (loginStatus?.isLocked && loginStatus?.lockExpiry! > new Date()) {
+		if (
+			loginStatus &&
+			loginStatus.isLocked! &&
+			loginStatus.lockExpiry! > new Date()
+		) {
 			await logLoginAttempt(
 				user?.id || null,
 				email,
@@ -111,7 +115,7 @@ export async function loginDb(req: Record<string, string>) {
 			// 1% chance to run cleanup
 			cleanupOldLoginAttempts();
 		}
-		
+
 		return {
 			success: true,
 			message: "Login successful",
@@ -120,14 +124,14 @@ export async function loginDb(req: Record<string, string>) {
 		};
 		// Set secure HTTP-only cookie
 	} catch (error) {
-		error instanceof Error &&
+		if (error instanceof Error) {
 			console.error("Login error:", {
 				message: error.message,
 				stack: error.stack,
 				timestamp: new Date().toISOString(),
 				duration: Date.now() - parseInt(startTime),
 			});
-
+		}
 		if (error instanceof DatabaseError) {
 			// Log error (in production, use proper logging service)
 			try {
@@ -236,8 +240,10 @@ const logLoginAttempt = async (
 		return result.rows[0];
 	} catch (error) {
 		// Log but don't throw - logging failure shouldn't break login
-		error instanceof Error &&
+		if (error instanceof Error) {
 			console.error("Failed to log login attempt:", error.message);
+		}
+
 		return null;
 	}
 };
@@ -272,11 +278,13 @@ const cleanupOldLoginAttempts = async () => {
 		const result = await db.query(query);
 		return result.rowCount;
 	} catch (error) {
-		error instanceof Error &&
+		if (error instanceof Error) {
 			console.error(
 				"Failed to cleanup old login attempts:",
 				error.message
 			);
+		}
+
 		return 0;
 	}
 };

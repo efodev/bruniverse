@@ -37,6 +37,7 @@ export async function POST(request: NextRequest) {
 			return NextResponse.json(result, { status: 500 });
 		}
 	} catch (error) {
+		console.log(error);
 		return NextResponse.json(
 			{ success: false, message: "An unexpected error occurred." },
 			{ status: 500 }

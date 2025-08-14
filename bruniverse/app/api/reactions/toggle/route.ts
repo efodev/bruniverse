@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { toggleReactionQuery } from "@/app/database/query";
-import db, { DatabaseError, handleDatabaseError } from "@/app/database/db";
+
+import db from "@/app/database/db";
 import { parseUserToken } from "../../lib";
 
 interface ToggleReactionRequest {
@@ -63,13 +63,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 			);
 		}
 
-		// Prepare parameters with explicit null handling
-		const params = [
-			userId,
-			reactionType,
-			postId || null,
-			commentId || null,
-		];
+		// // Prepare parameters with explicit null handling
+		// const params = [
+		// 	userId,
+		// 	reactionType,
+		// 	postId || null,
+		// 	commentId || null,
+		// ];
 
 		const data = await toggleReaction(
 			userId,

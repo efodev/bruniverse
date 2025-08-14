@@ -159,7 +159,7 @@ export async function GET(request: NextRequest) {
 		} else if (sortBy === "title") {
 			orderByClause = `relevance DESC, d.title ${sortOrder.toUpperCase()}`;
 		} else {
-			orderByClause = `relevance DESC, d.updated_at DESC`;
+			orderByClause = "relevance DESC, d.updated_at DESC";
 		}
 
 		// Get paginated search results with relevance ranking

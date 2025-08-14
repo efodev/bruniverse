@@ -1,14 +1,6 @@
 // app/api/categories/route.ts (App Router)
 import { NextResponse } from "next/server";
 import db from "@/app/database/db";
-interface Category {
-	id: string;
-	name: string;
-	description: string;
-	color_hex: string;
-	is_active?: boolean;
-	created_at?: string;
-}
 
 const getCategoriesQuery = `
   SELECT 

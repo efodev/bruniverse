@@ -2,11 +2,7 @@
 // app/api/drafts/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import db, { DatabaseError } from "@/app/database/db";
-import {
-	parseUserToken,
-	validateApiPostInput,
-	CreatePostRequest,
-} from "../lib";
+import { parseUserToken, CreatePostRequest } from "../lib";
 
 interface UpdateDraftRequest {
 	id: number;
@@ -114,7 +110,7 @@ export async function GET(request: NextRequest) {
 
 		// Build search condition
 		let searchCondition = "";
-		let searchParams_db = [user.id];
+		const searchParams_db = [user.id];
 
 		if (search) {
 			searchCondition = `AND (
