@@ -25,7 +25,7 @@ export function validateApiPostInput(body: any): {
 	errors: string[];
 } {
 	const errors: string[] = [];
-
+	console.log(body);
 	if (!body.title || typeof body.title !== "string") {
 		errors.push("Title is required and must be a string");
 	} else if (body.title.trim().length === 0) {
@@ -43,9 +43,9 @@ export function validateApiPostInput(body: any): {
 	if (!body.categoryId || typeof body.categoryId !== "string") {
 		errors.push("Category ID is required and must be a string");
 	}
-
+	console.log(body.isAnonymous);
 	if (typeof body.isAnonymous !== "boolean") {
-		errors.push("is_anonymous must be a boolean");
+		errors.push("isAnonymous must be a boolean");
 	}
 
 	return {

@@ -564,7 +564,7 @@ export const createPost = async (
 				title: postData.title,
 				content: postData.content,
 				categoryId: postData.categoryId,
-				is_anonymous: postData.isAnonymous,
+				isAnonymous: postData.isAnonymous,
 			}),
 		});
 

@@ -105,7 +105,7 @@ export const Reactions = ({
 						<Icon
 							size={size}
 							fill={reaction.isActive ? "currentColor" : "none"}
-							className={`flex-shrink-0 z-5 ${isCurrentlyLoading ? "animate-pulse" : ""}`}
+							className={`flex-shrink-0 ${isCurrentlyLoading ? "animate-pulse" : ""}`}
 						/>
 						{showCount && (
 							<span
