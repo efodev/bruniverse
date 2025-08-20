@@ -41,5 +41,7 @@
 
 -   Wierd Display if category is not loaded. Look into that. I'm thinking it's will have to do with min width.
 - Find a way to keep the user info at session storage active
+- Remember previous api query for each api service function in order to add fetch batches with pagination. (v2). Move more to using redux patterns..
 
 *   I am also thinking to rebuild the entire frontend using size relative to the viewport width first, while setting the window with to 100% and other stuff relative. Also fonts will be rem units. -- Basically follow Melody's design to the Tee.
+ 

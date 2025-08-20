@@ -233,7 +233,7 @@ const EnhancedLeftSidebar = ({
 	selectedPost,
 	onPostSelect,
 	options,
-	onCategoryChange,
+	onDropdownItemChange,
 	pagination,
 	onPageChange,
 	isLoading,
@@ -247,7 +247,10 @@ const EnhancedLeftSidebar = ({
 	selectedPost: Post | null;
 	onPostSelect: (post: Post) => void;
 	options: LeftSideBarTopLevelItemsProps[];
-	onCategoryChange: (category: string) => void;
+	onDropdownItemChange?: (params: {
+		filter?: string;
+		category?: string;
+	}) => Promise<void>;
 	pagination: PaginationInfo;
 	onPageChange: (page: number) => void;
 	isLoading: boolean;
@@ -258,21 +261,32 @@ const EnhancedLeftSidebar = ({
 	createPostButton?: { show: boolean; onClick: () => void };
 }) => {
 	const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-	const [activeCategory, setActiveCategory] = useState<string>("all");
+	const [activeOption, setActiveOption] = useState<string>("all");
 
 	const handleItemClick = (item: LeftSideBarTopLevelItemsProps) => {
-		setActiveCategory(item.id);
+		if (activeOption !== "all" && item.id === "all") {
+			handleDropdownItemClick("all");
+		}
+		setActiveOption(item.id);
 		if (item.hasDropdown) {
 			setOpenDropdown(openDropdown === item.id ? null : item.id);
 		} else {
-			onCategoryChange(item.id);
 			setOpenDropdown(null);
 		}
 	};
 
+	// Helper method for fetching post on dropdown change;
 	const handleDropdownItemClick = (itemId: string) => {
-		onCategoryChange(itemId);
 		setOpenDropdown(null);
+		const params = { category: "", filter: "" };
+		if (activeOption === "categories") {
+			params.category = itemId;
+		} else {
+			params.filter = itemId;
+		}
+		onDropdownItemChange!(params);
+
+		// Toggle mobile view
 		if (isMobile) onToggle();
 	};
 
@@ -292,7 +306,7 @@ const EnhancedLeftSidebar = ({
 							<button
 								onClick={() => handleItemClick(item)}
 								className={`px-2 py-2 rounded-full text-sm font-medium transition-colors flex items-center space-x-2 ${
-									activeCategory === item.id
+									activeOption === item.id
 										? "bg-[#B10F0F] text-white"
 										: "bg-[#CC810033] hover:bg-amber-200"
 								}`}
@@ -968,16 +982,13 @@ const EnhancedMainPostPage = () => {
 		const loadPosts = async () => {
 			setIsLoading(true);
 			try {
-				console.log("Pagination, ", JSON.stringify(Pagination));
 				const result = await fetchPosts({
 					page: pagination.currentPage,
 					category: activeCategory,
 					search: searchQuery,
 					limit: 10,
 				});
-				// if (!result.success) {
-				// 	location.reload();
-				// }
+
 				setPosts(result.data.posts);
 				setPagination(result.data.pagination);
 			} catch (error) {
@@ -1097,6 +1108,29 @@ const EnhancedMainPostPage = () => {
 		}
 	};
 
+	// Helper function for fetching items from dropdown-items besides categories
+	const handleTopLevelItemClicked = async (params: {
+		category?: string;
+		filter?: string;
+	}) => {
+		setIsLoading(true);
+		try {
+			const result = await fetchPosts({
+				page: pagination.currentPage,
+				filter: params.filter,
+				category: params.category,
+				limit: 10,
+			});
+
+			setPosts(result.data.posts);
+			setPagination(result.data.pagination);
+		} catch (error) {
+			console.error("Failed to fetch posts:", error);
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
 	const topLevelItems: LeftSideBarTopLevelItemsProps[] = [
 		{ id: "all", name: "All", hasDropdown: false },
 		{
@@ -1141,7 +1175,7 @@ const EnhancedMainPostPage = () => {
 						selectedPost={selectedPost}
 						onPostSelect={setSelectedPost}
 						options={topLevelItems}
-						onCategoryChange={handleCategoryChange}
+						onDropdownItemChange={handleTopLevelItemClicked}
 						pagination={pagination}
 						onPageChange={handlePageChange}
 						isLoading={isLoading}

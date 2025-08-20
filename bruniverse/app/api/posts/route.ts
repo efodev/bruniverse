@@ -108,7 +108,7 @@ WHERE
 RETURNING id;`;
 
 const getPostsBaseQuery = `
-  SELECT 
+SELECT
     p.id,
     p.title,
     p.content,
@@ -525,6 +525,28 @@ function buildWhereClause(
 				conditions.push(
 					`p.user_id = $${paramIndex} AND p.moderation_status = 'pending'`
 				);
+				queryParams.push(userId);
+				paramIndex++;
+				break;
+			case "starred-posts":
+				conditions.push(`EXISTS (
+					SELECT 1 FROM reactions r
+					WHERE r.post_id = p.id
+					AND r.user_id = $${paramIndex}
+					AND r.reaction_type = 'star'
+				)`);
+				queryParams.push(userId);
+				paramIndex++;
+				break;
+
+			case "starred-comments":
+				conditions.push(`EXISTS (
+					SELECT 1 FROM comments c
+					INNER JOIN reactions r ON r.comment_id = c.id
+					WHERE c.post_id = p.id
+					AND r.user_id = $${paramIndex}
+					AND r.reaction_type = 'star'
+				)`);
 				queryParams.push(userId);
 				paramIndex++;
 				break;
